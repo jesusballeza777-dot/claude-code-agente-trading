@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.11.32"
+  GITLEAKS_VERSION: "v8.30.1"
+  HYPOTHESIS_PROFILE: ci
+
+jobs:
+  checks:
+    name: lint, tipos y tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Instalar dependencias (lockfile obligatorio)
+        run: uv sync --locked
+
+      - name: Higiene de ficheros (pre-commit; gitleaks, ruff y mypy corren en pasos propios)
+        env:
+          SKIP: gitleaks,ruff-check,ruff-format,mypy
+        run: uv run --frozen pre-commit run --all-files --show-diff-on-failure
+
+      - name: ruff check
+        run: uv run --frozen ruff check .
+
+      - name: ruff format
+        run: uv run --frozen ruff format --check .
+
+      - name: mypy
+        run: uv run --frozen mypy
+
+      - name: pytest con cobertura
+        run: uv run --frozen pytest --cov --cov-report=term-missing
+
+      - name: Cobertura del motor de riesgo >= 95% (CLAUDE.md regla 4)
+        run: uv run --frozen coverage report --include="src/trading/risk/*" --fail-under=95
+
+  gitleaks:
+    name: gitleaks (historial completo)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: "1.24"
+          cache: false
+
+      # Misma versión que el gancho de pre-commit; el proxy de módulos de Go verifica la integridad.
+      - name: Instalar gitleaks
+        run: go install "github.com/zricethezav/gitleaks/v8@${GITLEAKS_VERSION}"
+
+      - name: Escanear todo el historial
+        run: '"$(go env GOPATH)/bin/gitleaks" git --redact --verbose --no-banner .'
