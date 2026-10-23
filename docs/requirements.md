@@ -1,6 +1,6 @@
 # Documento de requisitos v2
 
-**Estado:** borrador para aprobación del propietario · **Fecha:** 23-oct-2026
+**Estado:** vigente; recoge las decisiones del propietario del 23-oct-2026 · **Fecha:** 23-oct-2026
 **Fuente:** `docs/plan-maestro-v2.md` (22-oct-2026) y `CLAUDE.md`. Cada punto cita su sección de origen.
 No es asesoría financiera, legal ni fiscal.
 
@@ -54,7 +54,7 @@ con un capital de USD 1,500 en USDC **[confirmado, plan §1]**.
 |---|---|---|---|
 | S1 | El propietario dispone de USD 1,500 en USDC en una cuenta de Binance dedicada | confirmado (plan §1) | F1 |
 | S2 | Los futuros USDⓈ-M de Binance están habilitados para la cuenta en México (cuestionario de derivados superado y posibilidad de abrir posición) | **PENDIENTE** (plan §8) | F1 |
-| S3 | Claude Max 5x incluye créditos de API suficientes para el analista | por verificar (plan §1, §6); probablemente **no**: la API se factura aparte (ver `docs/f1-verificacion-plataforma.md`) | F1 |
+| S3 | El analista usa una cuenta de API por consumo, aparte de la suscripción Max 5x (decisión del propietario, 23-oct-2026) | confirmado; coste estimado USD 5-15/mes por verificar en la F5 | F1, F5 |
 | S4 | El propietario dedica 20 h/semana | confirmado (plan §1) | seguimiento semanal |
 | S5 | Los datos de futuros de Binance son gratuitos en el MVP | estimado (plan §6) | F3 |
 | S6 | El histórico de funding y OI necesario para H4 está disponible con la profundidad suficiente | **confirmado en parte** (23-oct-2026, archivo público de Binance): funding desde 2020-01; OI desde 2020-09 (BTC) y 2021-12 (ETH). H4 usa solo funding | F3 |
@@ -113,29 +113,26 @@ está en `research/preregistration/00-protocolo-comun.md` (C-05 a C-17).
 |---|---|
 | Dedicación | 20 h/semana |
 | Calendario hasta capital real | ~5-6 meses |
-| Gasto operativo | ~USD 110-117/mes (MXN ~2,060-2,190 al FIX de 18.70), ~7.5% mensual del capital |
+| Gasto operativo | ~USD 110-117/mes según el plan §6; con Max 5x más la API por consumo, ≈USD 120-130/mes (**estimado**), ≈8% mensual del capital |
 | Shadow trading (F7) | ≥12 semanas |
 | Piloto real (F8) | 3 meses con USD 1,500 |
 
 ## 6. Criterios de parada
 
-### 6.1 Parada del proyecto — **PENDIENTE de aceptación del propietario (plan §8)**
+### 6.1 Parada del proyecto — **sin topes (decisión del propietario, 23-oct-2026; ADR-008)**
 
-El proyecto se detiene si se cumple **cualquiera** de estos topes sin haber llegado a la F8:
-
-| Tope | Valor propuesto | Estado |
-|---|---|---|
-| Horas de construcción | 450 h | PENDIENTE |
-| Gasto operativo acumulado | USD 900 | PENDIENTE |
-| Calendario | 7 meses | PENDIENTE |
+El plan §8 proponía detener el proyecto a las 450 h de construcción, USD 900 de gasto o 7 meses sin llegar a la F8.
+El propietario lo rechazó: el proyecto sigue mientras él lo decida, mejorando de forma continua bajo las reglas
+del ADR-008 (cada mejora pre-registrada y contada en el DSR; el gate no se relaja). Se recomienda una revisión mensual
+de gasto, horas y avance.
 
 ### 6.2 Parada del sistema en operación — **[confirmado, plan §3-4]**
 
 - Drawdown ≥15% (USD 225 con el capital inicial de USD 1,500): el sistema se detiene (sin nuevas entradas).
 - Drawdown ≥20% (USD 300 con el capital inicial): corte duro.
-- La base del drawdown (máximo histórico del capital o capital inicial) es una interpretación propuesta en ADR-007.
+- El drawdown se mide desde el máximo histórico del capital (ADR-007, aceptado).
 - Pérdida diaria ≥2% o semanal ≥4% (F7-F8): sin nuevas entradas hasta el siguiente periodo.
-- Datos atrasados: sin nuevas entradas mientras dure el retraso (umbral propuesto en ADR-007, pendiente de aprobación).
+- Datos atrasados: sin nuevas entradas mientras dure el retraso (umbrales de ADR-007, aceptado).
 - Nivel A: se apaga solo tras 2 pérdidas seguidas de nivel A; el propietario puede apagarlo en cualquier momento.
 
 ### 6.3 Parada de una hipótesis — **[confirmado, plan §5; CLAUDE.md reglas 6-7]**
@@ -143,14 +140,16 @@ El proyecto se detiene si se cumple **cualquiera** de estos topes sin haber lleg
 - Una hipótesis que no pasa el gate de la F4 no avanza. No se re-optimiza sobre el holdout ni se prueba una variante
   sin anotarla en `research/trials.csv`.
 
-## 7. Pendientes para cerrar la F0 (plan §8)
+## 7. Pendientes de la F0 (plan §8): estado al 23-oct-2026
 
 | Pendiente | Estado | Dónde se refleja |
 |---|---|---|
-| Topes de parada (450 h, USD 900, 7 meses) | **PENDIENTE** de aceptación | §6.1 |
-| Confirmar Futuros USDⓈ-M habilitados en Binance para México | **PENDIENTE** (si no, la parte de apalancamiento cambia de plataforma) | S2, ADR-001, ADR-002 |
-| Decidir entre Claude Max 5x y Pro + API | **PENDIENTE** | S3, ADR-003 |
-| Documento de requisitos v2 | **PENDIENTE** de aprobación (este documento, en borrador) | — |
-| ADR-001 a 006 | **PENDIENTE** de aprobación (redactados como "Propuesto") | `docs/adr/` |
-| Pre-registro de H1-H4 | **PENDIENTE** de aprobación y fusión: H1, H2 y H4 en v1 "listo para fusionar" (decisiones delegadas en Claude el 23-oct-2026); H3 aplazada a la F9 | `research/preregistration/` |
-| Límites de riesgo firmados | **PENDIENTE** de firma; codificados en `src/trading/risk/` | ADR-007 |
+| Topes de parada (450 h, USD 900, 7 meses) | **Decidido:** rechazados por el propietario | §6.1, ADR-008 |
+| Confirmar Futuros USDⓈ-M habilitados en Binance para México | **PENDIENTE (F1)**, lo comprueba el propietario | S2, `docs/f1-verificacion-plataforma.md` |
+| Decidir entre Claude Max 5x y Pro + API | **Decidido:** Max 5x + API por consumo para el analista | S3, ADR-003 |
+| Documento de requisitos v2 | Vigente | este documento |
+| ADR-001 a 008 | **Aceptados** por el propietario | `docs/adr/` |
+| Pre-registro | **Aprobado** por el propietario: protocolo común v1, H1-v1, H2-v1, H4-v1; H3 aplazada a la F9. Se fusiona en `main` con hash anotado | `research/preregistration/` |
+| Límites de riesgo firmados | **Firmados** con la aceptación de ADR-007 | `src/trading/risk/limits_f7_f8.toml` |
+
+La F0 queda cerrada. Lo único que sigue abierto del plan §8 es la verificación de los futuros para México, que es de la F1.

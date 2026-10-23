@@ -1,8 +1,8 @@
 # Pre-registro H1-v1: momentum de series temporales diario en BTC
 
 - **ID:** H1 · **Versión:** v1 · **Prioridad:** Alta (plan §5)
-- **Estado:** LISTO PARA FUSIONAR (falta la aprobación del propietario y la fusión en `main`)
-- **Fecha:** 2026-10-23 · **Autor:** Claude, con decisiones delegadas por el propietario el 23-oct-2026 · **Aprobado por:** —
+- **Estado:** LISTO PARA FUSIONAR (aprobado por el propietario; pendiente solo de la fusión en `main`)
+- **Fecha:** 2026-10-23 · **Autor:** Claude, con decisiones delegadas por el propietario el 23-oct-2026 · **Aprobado por:** propietario, 23-oct-2026
 - **Commit de fusión:** `________`
 - **Protocolo común:** `00-protocolo-comun.md` v1
 

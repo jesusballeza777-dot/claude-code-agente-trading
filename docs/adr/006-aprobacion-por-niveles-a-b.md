@@ -1,6 +1,6 @@
 # ADR-006: Aprobación por niveles A/B
 
-- **Estado:** Propuesto (recoge la decisión del propietario del 22-oct-2026; falta su aprobación de este texto)
+- **Estado:** Aceptado (aprobado por el propietario el 23-oct-2026)
 - **Fecha:** 2026-10-23
 - **Decide:** propietario del proyecto
 - **Fuentes:** plan maestro v2 §1 (#5), §4; CLAUDE.md reglas 2, 3 y 4

@@ -16,7 +16,7 @@ Documento rector: `docs/plan-maestro-v2.md`. Si algo aquí contradice al plan, a
 
 ## Forma de trabajar
 
-- Fase actual: **F0 (alcance y gobernanza) + cimientos de F2**. No escribas código que se conecte a Binance hasta la F1/F3.
+- Fase actual: **F0 cerrada (23-oct-2026). F1 (verificación de plataforma, la hace el propietario: `docs/f1-verificacion-plataforma.md`) + cimientos de F2**. No escribas código que se conecte a Binance hasta la F1/F3.
 - Antes de añadir una dependencia o herramienta, justifica qué problema resuelve.
 - No declares nada terminado sin pruebas reproducibles; muestra la salida de los tests.
 - Distingue en los documentos: confirmado / estimado / hipótesis / por verificar.

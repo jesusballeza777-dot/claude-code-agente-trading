@@ -1,8 +1,9 @@
 # Protocolo común de investigación (F4)
 
-- **Versión:** v1 · **Estado:** LISTO PARA FUSIONAR (decisiones tomadas; falta la aprobación del propietario y la fusión en `main`)
+- **Versión:** v1 · **Estado:** LISTO PARA FUSIONAR (aprobado por el propietario; pendiente solo de la fusión en `main`)
 - **Fecha:** 2026-10-23 · **Aplica a:** H1, H2, H4 (H3 aplazada)
 - **Fuentes:** plan maestro v2 §3, §5; CLAUDE.md reglas 6 y 7; ADR-001, ADR-004, ADR-007
+- **Aprobado por:** propietario, 23-oct-2026
 - **Quién decidió:** el propietario delegó las decisiones abiertas en Claude el 23-oct-2026 ("avanza y termina el trabajo"). Cada decisión lleva su justificación; el propietario puede cambiar cualquiera **antes** de fusionar, nunca después de ver resultados.
 
 Lo que el plan ya decide se marca **[fijado]**. Ninguna decisión de este documento se ha tomado mirando resultados de backtest: no se ha ejecutado ninguno.

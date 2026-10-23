@@ -1,6 +1,6 @@
 # ADR-004: Horizonte: velas de 4h y 1d
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado (aprobado por el propietario el 23-oct-2026)
 - **Fecha:** 2026-10-23
 - **Decide:** propietario del proyecto
 - **Fuentes:** plan maestro v2 §1 (#3, #5), §3, §4, §5

@@ -1,6 +1,6 @@
 # ADR-005: Numeración de fases F0-F9
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado (aprobado por el propietario el 23-oct-2026)
 - **Fecha:** 2026-10-23
 - **Decide:** propietario del proyecto
 - **Fuentes:** plan maestro v2 §5, §7, §8; CLAUDE.md
@@ -15,7 +15,7 @@ La numeración es fija. No se renumera ni se insertan fases intermedias; el trab
 
 | Fase | Nombre | Duración aprox. (20 h/sem) | Criterio de salida |
 |---|---|---|---|
-| F0 | Alcance y gobernanza | 1 sem | Pendientes del plan §8 cerrados: topes de parada aceptados, requisitos v2, ADR-001 a 006 aprobados, pre-registro de H1-H4 fusionado con hash de commit, límites de riesgo firmados |
+| F0 | Alcance y gobernanza | 1 sem | Pendientes del plan §8 cerrados: topes de parada decididos (rechazados por el propietario, ADR-008), requisitos v2, ADR-001 a 008 aprobados, pre-registro fusionado con hash de commit, límites de riesgo firmados (ADR-007). **Cerrada el 23-oct-2026** |
 | F1 | Plataforma | 1 sem | Futuros USDⓈ-M verificados para México (o contingencia decidida); Max 5x vs Pro + API decidido; identificador del modelo fijado (ADR-003) |
 | F2 | Fundaciones de ingeniería y seguridad | 1-2 sem | CI en verde con lint, tipos, tests y gitleaks; SOPS/age operativo; motor de riesgo con cobertura ≥95% |
 | F3 | Datos: spot + futuros, funding y OI | 2 sem | Datos históricos y su calidad verificados; holdout 2025-01-01 → hoy sellado |
@@ -39,4 +39,4 @@ Los criterios de salida de F1-F3 y F5-F9 que no figuran literalmente en el plan 
 
 - Las referencias a fases en documentos, commits y código son inequívocas.
 - La F5 se solapa con la F4; el analista no se evalúa sobre el holdout.
-- Los topes de parada del proyecto (plan §8, PENDIENTE) se miden hasta la llegada a la F8.
+- El propietario rechazó los topes de parada del proyecto (plan §8); ver ADR-008.

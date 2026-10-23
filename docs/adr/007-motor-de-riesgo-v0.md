@@ -1,6 +1,6 @@
 # ADR-007: Motor de riesgo v0: diseño e interpretación de los límites
 
-- **Estado:** Propuesto (las interpretaciones de la sección 3 y los umbrales de datos requieren aprobación del propietario)
+- **Estado:** Aceptado (aprobado por el propietario el 23-oct-2026), incluidas las interpretaciones de la sección 3 y los umbrales de datos atrasados. Con esta aprobación quedan firmados los límites de riesgo de F7-F8
 - **Fecha:** 2026-10-23
 - **Decide:** propietario del proyecto
 - **Fuentes:** plan maestro v2 §3; CLAUDE.md reglas 3 y 4; ADR-001; código en `src/trading/risk/`
@@ -26,7 +26,7 @@
 - Los valores operativos de F7-F8 están en `src/trading/risk/limits_f7_f8.toml`, versionado. Claves desconocidas o ausentes son un error.
 - Los techos del plan están en código (`limits.py`) y ninguna configuración puede superarlos: riesgo por operación ≤1%, apalancamiento efectivo ≤3×, ratio liquidación/stop ≥3, pérdida diaria ≤2%, semanal ≤5%, drawdown ≤20%.
 
-### 3. Interpretaciones propuestas (a ratificar)
+### 3. Interpretaciones aprobadas
 
 | Límite (plan §3) | Interpretación implementada | Por qué |
 |---|---|---|
@@ -41,7 +41,7 @@
 
 **Límites exactos:** en presupuestos (riesgo, apalancamiento, pérdidas, exposición conjunta) y en la distancia a liquidación, alcanzar exactamente el límite está permitido y superarlo se veta. En drawdown, alcanzar exactamente el umbral activa la parada. Los tests cubren ambos lados de cada límite.
 
-### 4. Datos atrasados — **PROPUESTO, no está en el plan**
+### 4. Datos atrasados (no están en el plan; aprobados con este ADR)
 
 Se veta la entrada si:
 

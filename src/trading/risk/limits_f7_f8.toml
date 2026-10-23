@@ -16,7 +16,7 @@ drawdown_hard_stop = 0.20              # corte duro: cerrar posiciones (USD 300 
 correlated_groups = [["BTC", "ETH"]]   # una sola exposición (correlación ~0.8)
 short_enabled_strategies = []          # ninguna estrategia validada en ambas direcciones todavía
 
-# PROPUESTO (no está en el plan): umbrales de datos atrasados pendientes de aprobación (ADR-007).
+# No están en el plan: umbrales de datos atrasados aprobados por el propietario en ADR-007 (23-oct-2026).
 [data_freshness]
 max_price_age_seconds = 60             # edad máxima del precio usado para la entrada
 max_bar_lag_seconds = 300              # retraso tolerado de la siguiente vela cerrada
