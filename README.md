@@ -13,17 +13,19 @@ y la ejecución real está desactivada (`LIVE_TRADING=false`).
 - [`docs/plan-maestro-v2.md`](docs/plan-maestro-v2.md): plan maestro v2 y decisiones del propietario.
 - `docs/requirements.md`, `docs/adr/`, `docs/risk_register.md`: requisitos, decisiones de arquitectura y riesgos.
 - `research/preregistration/`: pre-registro de hipótesis antes de cualquier backtest.
-- [`docs/f1-verificacion-plataforma.md`](docs/f1-verificacion-plataforma.md): comprobaciones que hace el propietario en Binance y en Anthropic (F1).
+- [`docs/f1-verificacion-plataforma.md`](docs/f1-verificacion-plataforma.md): comprobaciones que hace el propietario en Binance, Hyperliquid y Anthropic (F1).
 - [`ops/secrets.md`](ops/secrets.md): puesta en marcha de SOPS/age para los secretos.
+- [`docs/app/especificacion.md`](docs/app/especificacion.md): la app Android (resumen, decisiones, aprendizaje, controles y reportes fiscales).
 
 ## Estructura
 
 ```
 docs/            plan maestro, requisitos, registro de riesgos, ADR
 research/        preregistration/, trials.csv, notebooks/ (sin datos crudos)
-src/trading/     data/, features/, signals/, risk/, decision/, execution/, audit/
+src/trading/     data/, features/, signals/, risk/, decision/, execution/, audit/, reporting/
 tests/           espejo de src/
-ops/             runbook.md, incidents/
+ops/             runbook.md, incidents/, secrets.md
+app/android/     app Android de control (Kotlin + Compose), compilada en CI
 ```
 
 ## Desarrollo
