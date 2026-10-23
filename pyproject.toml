@@ -29,6 +29,7 @@ module-name = "trading"
 minversion = "9.0"
 testpaths = ["tests"]
 addopts = ["-ra", "--strict-markers", "--strict-config", "--import-mode=importlib"]
+pythonpath = ["tests"]
 xfail_strict = true
 
 # --- coverage ---------------------------------------------------------------------
@@ -81,7 +82,12 @@ strict_equality = true
 extra_checks = true
 
 [[tool.mypy.overrides]]
-module = ["trading.risk", "trading.risk.*", "trading.execution", "trading.execution.*"]
+module = [
+    "trading.risk", "trading.risk.*",
+    "trading.execution", "trading.execution.*",
+    "trading.audit", "trading.audit.*",
+    "trading.reporting", "trading.reporting.*",
+]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 disallow_untyped_calls = true
