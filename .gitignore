@@ -11,7 +11,9 @@
 *.agekey
 keys.txt
 age-key*.txt
-secrets/
+secrets/*
+!secrets/*.sops.yaml
+!secrets/*.sops.yml
 *.secret
 *.secrets
 

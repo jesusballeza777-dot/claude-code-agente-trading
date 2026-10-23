@@ -14,7 +14,7 @@
 |---|---|
 | Arranque y parada del sistema | F6 |
 | Kill switch y cierre de todas las posiciones | F6 |
-| Rotación de claves (SOPS/age) | F2 |
+| Rotación de claves (SOPS/age) | F2: puesta en marcha en [`secrets.md`](secrets.md) |
 | Respuesta a fuga de secretos (alerta de gitleaks) | F2 |
 | Caída de datos o datos atrasados | F3 |
 | Caída o restricción del exchange (contingencia Kraken, ADR-002) | F6 |

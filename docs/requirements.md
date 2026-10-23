@@ -54,7 +54,7 @@ con un capital de USD 1,500 en USDC **[confirmado, plan §1]**.
 |---|---|---|---|
 | S1 | El propietario dispone de USD 1,500 en USDC en una cuenta de Binance dedicada | confirmado (plan §1) | F1 |
 | S2 | Los futuros USDⓈ-M de Binance están habilitados para la cuenta en México (cuestionario de derivados superado y posibilidad de abrir posición) | **PENDIENTE** (plan §8) | F1 |
-| S3 | Claude Max 5x incluye créditos de API suficientes para el analista | por verificar (plan §1, §6) | F1 |
+| S3 | Claude Max 5x incluye créditos de API suficientes para el analista | por verificar (plan §1, §6); probablemente **no**: la API se factura aparte (ver `docs/f1-verificacion-plataforma.md`) | F1 |
 | S4 | El propietario dedica 20 h/semana | confirmado (plan §1) | seguimiento semanal |
 | S5 | Los datos de futuros de Binance son gratuitos en el MVP | estimado (plan §6) | F3 |
 | S6 | El histórico de funding y OI necesario para H4 está disponible con la profundidad suficiente | **confirmado en parte** (23-oct-2026, archivo público de Binance): funding desde 2020-01; OI desde 2020-09 (BTC) y 2021-12 (ETH). H4 usa solo funding | F3 |

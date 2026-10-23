@@ -13,6 +13,8 @@ y la ejecución real está desactivada (`LIVE_TRADING=false`).
 - [`docs/plan-maestro-v2.md`](docs/plan-maestro-v2.md): plan maestro v2 y decisiones del propietario.
 - `docs/requirements.md`, `docs/adr/`, `docs/risk_register.md`: requisitos, decisiones de arquitectura y riesgos.
 - `research/preregistration/`: pre-registro de hipótesis antes de cualquier backtest.
+- [`docs/f1-verificacion-plataforma.md`](docs/f1-verificacion-plataforma.md): comprobaciones que hace el propietario en Binance y en Anthropic (F1).
+- [`ops/secrets.md`](ops/secrets.md): puesta en marcha de SOPS/age para los secretos.
 
 ## Estructura
 
