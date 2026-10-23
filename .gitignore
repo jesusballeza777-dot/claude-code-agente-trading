@@ -1,0 +1,64 @@
+# --- Secretos (CLAUDE.md, regla 1) -------------------------------------------
+# Los secretos se leen solo desde SOPS/age en tiempo de ejecución. Los ficheros
+# cifrados con SOPS (*.sops.yaml, *.enc.*) sí pueden versionarse.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.agekey
+keys.txt
+age-key*.txt
+secrets/
+*.secret
+*.secrets
+
+# --- Datos crudos y derivados (no se versionan) --------------------------------
+# Ojo: anclado a la raíz para no ignorar el paquete src/trading/data/.
+/data/
+*.parquet
+*.feather
+*.arrow
+*.h5
+*.hdf5
+*.csv.gz
+*.zip
+*.sqlite
+*.sqlite3
+*.db
+*.csv
+!research/trials.csv
+research/notebooks/**/*.csv
+research/notebooks/**/*.parquet
+
+# --- Python --------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+.eggs/
+.python-version.local
+
+# --- Herramientas ----------------------------------------------------------------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.ipynb_checkpoints/
+
+# --- Logs y sistema --------------------------------------------------------------
+*.log
+logs/
+.DS_Store
+.idea/
+.vscode/
