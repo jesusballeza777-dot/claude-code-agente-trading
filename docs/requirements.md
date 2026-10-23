@@ -57,11 +57,12 @@ con un capital de USD 1,500 en USDC **[confirmado, plan §1]**.
 | S3 | Claude Max 5x incluye créditos de API suficientes para el analista | por verificar (plan §1, §6) | F1 |
 | S4 | El propietario dedica 20 h/semana | confirmado (plan §1) | seguimiento semanal |
 | S5 | Los datos de futuros de Binance son gratuitos en el MVP | estimado (plan §6) | F3 |
-| S6 | El histórico de funding y OI necesario para H4 está disponible con la profundidad suficiente | por verificar | F3 |
+| S6 | El histórico de funding y OI necesario para H4 está disponible con la profundidad suficiente | **confirmado en parte** (23-oct-2026, archivo público de Binance): funding desde 2020-01; OI desde 2020-09 (BTC) y 2021-12 (ETH). H4 usa solo funding | F3 |
 | S7 | BTC y ETH tienen una correlación ≈0.8 y se tratan como una sola exposición | estimado (plan §3) | F4 |
 | S8 | El contador del propietario revisa el tratamiento fiscal de los derivados antes de la F8 | confirmado (plan §1) | antes de F8 |
 | S9 | El holdout 2025-01-01 → hoy permanece sellado hasta el gate de la F4 | confirmado (CLAUDE.md regla 7) | F4 |
 | S10 | Las comisiones de futuros, el funding y el slippage se pueden modelar con suficiente precisión en el backtest | por verificar | F3-F4 |
+| S11 | El nocional mínimo de orden permite operar con USD 7.50 de riesgo (≈100 USDT en BTCUSDT según fuentes secundarias) | por verificar | F1 |
 
 ## 5. KPIs del sistema
 
@@ -83,7 +84,7 @@ Una hipótesis pasa a la F5-F7 solo si cumple **todo** lo siguiente, con comisio
 | Holdout 2025-26 (se abre una sola vez) | esperanza > 0 y PF ≥1.1 |
 
 La definición operativa de cada métrica (método del IC, regímenes, "sigue rentable", número de particiones del PBO, etc.)
-está abierta en `research/preregistration/PREGUNTAS-ABIERTAS.md`.
+está en `research/preregistration/00-protocolo-comun.md` (C-05 a C-17).
 
 ### 5.2 Riesgo (F6-F9) — **[confirmado, plan §3]**
 
@@ -151,5 +152,5 @@ El proyecto se detiene si se cumple **cualquiera** de estos topes sin haber lleg
 | Decidir entre Claude Max 5x y Pro + API | **PENDIENTE** | S3, ADR-003 |
 | Documento de requisitos v2 | **PENDIENTE** de aprobación (este documento, en borrador) | — |
 | ADR-001 a 006 | **PENDIENTE** de aprobación (redactados como "Propuesto") | `docs/adr/` |
-| Pre-registro de H1-H4 | **PENDIENTE**: borradores con preguntas abiertas; no se fusionan hasta resolverlas | `research/preregistration/` |
+| Pre-registro de H1-H4 | **PENDIENTE** de aprobación y fusión: H1, H2 y H4 en v1 "listo para fusionar" (decisiones delegadas en Claude el 23-oct-2026); H3 aplazada a la F9 | `research/preregistration/` |
 | Límites de riesgo firmados | **PENDIENTE** de firma; codificados en `src/trading/risk/` | ADR-007 |

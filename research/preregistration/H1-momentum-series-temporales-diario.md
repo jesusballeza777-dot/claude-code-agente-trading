@@ -1,93 +1,100 @@
-# Pre-registro H1-v0: momentum de series temporales diario en BTC/ETH
+# Pre-registro H1-v1: momentum de series temporales diario en BTC
 
-- **ID:** H1 · **Versión:** v0 · **Prioridad:** Alta (plan §5)
-- **Estado:** BORRADOR (decisiones abiertas H1-01 a H1-07 y comunes C-01 a C-18)
-- **Fecha:** 2026-10-23 · **Autor:** borrador preparado para el propietario · **Aprobado por:** —
+- **ID:** H1 · **Versión:** v1 · **Prioridad:** Alta (plan §5)
+- **Estado:** LISTO PARA FUSIONAR (falta la aprobación del propietario y la fusión en `main`)
+- **Fecha:** 2026-10-23 · **Autor:** Claude, con decisiones delegadas por el propietario el 23-oct-2026 · **Aprobado por:** —
 - **Commit de fusión:** `________`
-- **Protocolo común:** `00-protocolo-comun.md` v0
+- **Protocolo común:** `00-protocolo-comun.md` v1
 
 ## 1. Hipótesis
 
-- **Enunciado [hipótesis]:** en BTC y ETH, la rentabilidad pasada en un horizonte de semanas predice el signo de la rentabilidad futura en un horizonte parecido, en ambas direcciones; una estrategia que se posiciona en la dirección de esa rentabilidad pasada tiene esperanza neta positiva después de comisiones de futuros, funding y slippage.
-- **H0:** esperanza neta por operación ≤ 0. **Alternativa:** esperanza neta por operación > 0.
-- **Base:** Liu y Tsyvinski, "Risks and Returns of Cryptocurrency", *Review of Financial Studies* (2021) (plan §5), que documentan momentum de series temporales en criptomonedas en horizontes de 1 a 4 semanas. **[por verificar]**: la especificación exacta del paper (frecuencia, horizonte de formación y de tenencia) se comprueba contra el texto antes de fijar H1-02.
+- **Enunciado [hipótesis]:** en BTC, el signo de la rentabilidad de la última semana predice el signo de la rentabilidad de los días siguientes; una estrategia que se posiciona cada día en la dirección de esa rentabilidad tiene esperanza neta positiva después de comisiones de futuros, funding y slippage.
+- **H0:** esperanza neta por operación ≤ 0 R. **Alternativa:** > 0 R.
+- **Base:** Liu y Tsyvinski, "Risks and Returns of Cryptocurrency", *Review of Financial Studies* 34(6), 2021: documentan momentum de series temporales significativo a frecuencia diaria y semanal, con la rentabilidad de la última semana prediciendo las semanas siguientes. **[por verificar]**: el texto del paper no se pudo descargar desde este entorno (red bloqueada); la ventana de 7 días se basa en los resúmenes publicados del paper.
 
 ## 2. Datos
 
-- Velas diarias (cierre 00:00 UTC) de los perpetuos de BTC y ETH; contrato según C-01.
-- Funding histórico de esos contratos.
-- Periodo de investigación: inicio según C-03 → 2024-12-31. Holdout sellado: 2025-01-01 → fecha del gate.
+- Velas diarias (cierre 00:00 UTC) y funding del perpetuo BTCUSDT (C-01).
+- Periodo de investigación: 2020-01-01 → 2024-12-31 (C-03). Holdout sellado: 2025-01-01 → fecha del gate.
 
 ## 3. Universo
 
-- **[fijado, plan §5]** BTC y ETH. Sin otros activos.
-- BTC y ETH cuentan como **una sola exposición** en el motor de riesgo (plan §3). Cómo se resuelve cuando ambos dan señal: H1-05.
+- **Solo BTC** (decisión H1-05). ETH queda fuera de esta versión por dos motivos:
+  1. BTC y ETH son una sola exposición (plan §3): ambos a la vez obligarían a repartir el riesgo (0.25% cada uno).
+  2. Con 0.25% de riesgo (USD 3.75) y un stop diario típico de 5-8%, la orden de BTC quedaría en USD 45-75, por debajo del nocional mínimo de ≈100 USDT (C-19): la estrategia no se podría ejecutar.
+- Una versión con ETH sería un pre-registro nuevo y contaría como otra especificación en el DSR.
 
 ## 4. Regla exacta
 
-Estado actual: la regla tiene huecos que no se pueden rellenar sin decidir. Se escribe con los huecos marcados.
+Notación: `C_t` = cierre diario de la vela que termina en `t` (00:00 UTC); `ATR14_t` = ATR de Wilder de 14 días calculado con velas hasta `t` inclusive.
 
 ```
-para cada activo A en {BTC, ETH}, al cierre de cada vela diaria t (00:00 UTC):
-    señal_t = FUNCIÓN_SEÑAL(cierres de A hasta t inclusive, L)          # H1-01, H1-02
-    si la evaluación toca en t según FRECUENCIA (H1-03):
-        si señal_t > 0 y no hay largo abierto  -> ENTER_LONG en la apertura de t+1
-        si señal_t < 0 y no hay corto abierto  -> ENTER_SHORT en la apertura de t+1
-        si señal_t = 0 (zona neutral, si existe) -> salir y quedar plano     # H1-01
-    stop inicial = STOP(precio de entrada, ATR, k)                       # H1-04
-    salida = cambio de signo de la señal, o stop, o REGLA_SALIDA          # H1-04, H1-06
-    tamaño = motor de riesgo (riesgo fijo por operación / distancia al stop)
+señal_t = +1 si C_t / C_{t-7} - 1 > 0
+          -1 si C_t / C_{t-7} - 1 < 0
+          señal_{t-1} si es exactamente 0
+
+en cada cierre diario t (desde que hay 14 días de ATR y 7 de rentabilidad):
+    si hay posición y su dirección es contraria a señal_t:
+        cerrar en la apertura de t+1                                  # salida por cambio de señal
+    si no hay posición (o se acaba de cerrar) y la entrada está permitida:
+        ENTER en la dirección de señal_t en la apertura de t+1
+        stop fijo = entrada - 2 × ATR14_t (largo) | entrada + 2 × ATR14_t (corto)
+    la posición también se cierra si se alcanza el stop (sección 3 del protocolo)
+
+entrada permitida:
+    tras un cierre por cambio de señal: sí (se invierte la posición)
+    tras un stop: solo cuando la señal cambie de signo; la nueva entrada es en la dirección nueva
+tamaño: motor de riesgo, 0.5% del capital; si queda por debajo del nocional mínimo, no se opera
 ```
 
-- **4.2 Dirección:** largo y corto **[fijado, plan §5]**. Los cortos solo se habilitan si la hipótesis se valida en ambas direcciones (C-16).
-- **4.6 Tamaño:** lo calcula el motor de riesgo (C-12).
+- **4.2 Dirección:** largo y corto. Los cortos solo se habilitan si se cumple C-16.
+- **4.3 Stop:** fijo desde la entrada, sin trailing (H1-04).
+- **4.4 Salida:** cambio de signo de la señal o stop. Sin salida por tiempo (H1-06).
 
-## 5. Parámetros y rangos permitidos
+## 5. Parámetros
 
-Ningún valor está decidido. Las rejillas son candidatas para que el propietario elija.
+| Parámetro | Valor pre-registrado | Variantes ±20% (robustez y PBO) |
+|---|---|---|
+| L: ventana de la rentabilidad (días) | 7 | 6, 8 |
+| n: ventana del ATR (días) | 14 | 11, 17 |
+| k: múltiplo de ATR del stop | 2 | 1.6, 2.4 |
 
-| Parámetro | Rejilla candidata | Rango para la prueba ±20% | Pregunta |
-|---|---|---|---|
-| L: ventana de formación (días) | {7, 14, 21, 28} | cada valor ±20% | H1-02 |
-| Frecuencia de evaluación | diaria / semanal (lunes 00:00 UTC) | — | H1-03 |
-| n: ventana del ATR para el stop (días) | {14, 20} | ±20% | H1-04 |
-| k: múltiplo de ATR del stop | {2, 3, 4} | ±20% | H1-04 |
-| Zona neutral (si existe) | umbral sobre la rentabilidad de L días en unidades de volatilidad: {0, 0.5} | ±20% | H1-01 |
-
-Número total de variantes: depende de las respuestas (con todas las rejillas de arriba serían 4 × 2 × 2 × 3 × 2 = 96).
+- Especificaciones principales: **1** (C-04). Rejilla de robustez completa para el PBO: 3³ = 27 variantes.
+- **Estimación previa del número de operaciones (sin datos):** para un paseo aleatorio, el signo de una suma móvil de 7 días cambia con una frecuencia de arccos(6/7)/π ≈ 0.17 por día, es decir ≈60 cambios al año. En 5 años son ≈290 operaciones menos el efecto de los stops y de las órdenes no ejecutables. Es una estimación teórica, no un resultado: si el backtest da menos de 200 operaciones, H1 no pasa el gate.
 
 ## 6. Costes asumidos
 
-Según el protocolo común (C-14): comisión taker en entrada y salida, funding histórico real en cada liquidación, slippage por lado y en stops; stress ×1.5 de todos los costes en el gate.
+Los del protocolo común (C-14): comisión taker 0.05% por lado, slippage 0.05% por lado (0.10% en stops), funding histórico real; stress ×1.5 en el gate.
 
 ## 7. Protocolo de validación
 
-Según C-04 (walk-forward), C-10 (PBO), C-11 (DSR) y C-15/C-16 (conteo y direcciones).
+Parámetros fijados a priori (C-04); todo el periodo posterior al calentamiento es fuera de muestra. PBO sobre la rejilla de 27 variantes (C-10); DSR con N de C-11.
 
 ## 8. Métricas y gate de la F4
 
-Gate del plan §5 sin cambios, con las definiciones del protocolo común (sección 1).
+Gate del plan §5 sin cambios, con las definiciones del protocolo común v1.
 
 ## 9. Criterios de invalidación
 
 - Cualquier resultado sobre datos ≥2025-01-01 antes del gate.
-- Cualquier variante fuera de la rejilla pre-registrada, o ejecutada sin anotarse en `trials.csv`.
-- Cambiar la regla después de ver resultados (requiere H1-v1 y cuenta como pruebas adicionales).
+- Ejecutar una variante fuera de la rejilla pre-registrada, o cualquier ejecución sin anotarla en `trials.csv`.
+- Cambiar la regla después de ver resultados (requiere H1-v2 y cuenta como especificación adicional en el DSR).
 
-## 10. Decisiones abiertas
+## 10. Decisiones
 
-| ID | Pregunta | Opciones | Recomendación (no es decisión) | Decisión del propietario |
-|---|---|---|---|---|
-| H1-01 | ¿Qué es la señal? | (a) Signo de la rentabilidad acumulada de L días (momentum de series temporales clásico): siempre largo o corto. (b) Cierre frente a su media móvil de L días. (c) Rentabilidad de L días dividida por su volatilidad, con zona neutral (plano si \|valor\| < umbral). | (a), por ser la definición de la literatura; (c) como segunda opción si se quiere reducir rotación | |
-| H1-02 | ¿Qué valores de L se prueban? | (a) Solo uno, fijado ahora (por ejemplo 28 días). (b) Rejilla {7, 14, 21, 28}. (c) Otra. | Fijarlo tras verificar el paper; si se usa rejilla, cuenta para DSR y PBO | |
-| H1-03 | ¿Con qué frecuencia se evalúa la señal? | (a) Diaria al cierre de 00:00 UTC. (b) Semanal (lunes 00:00 UTC), como en la referencia. | (b) si el paper usa datos semanales: menos rotación y menos costes; (a) da más operaciones | |
-| H1-04 | ¿Cuál es el stop de protección? El motor de riesgo necesita un stop para dimensionar. | (a) k × ATR(n) desde la entrada, fijo. (b) k × ATR(n), que se mueve a favor (trailing). (c) Sin stop técnico: stop catastrófico amplio solo para el tamaño. | (a): es el más simple y no añade una segunda estrategia de salida | |
-| H1-05 | BTC y ETH son una sola exposición. ¿Qué pasa si ambos dan señal? | (a) Solo se opera BTC; ETH no se opera en H1. (b) Se reparte el riesgo de una operación entre ambos (0.25% cada uno). (c) Se opera el primero que da señal; el otro espera. (d) Se investigan por separado sin la regla y la regla se aplica desde la F6 (contradice C-12a). | (b): conserva la muestra de ambos activos sin superar el riesgo de una exposición | |
-| H1-06 | ¿Hay salida por tiempo o mínimo de permanencia? | (a) No; solo cambio de señal o stop. (b) Salida tras H días aunque no cambie la señal. | (a) | |
-| H1-07 | Tras un stop, ¿cuándo se puede volver a entrar? | (a) Solo cuando la señal cambie de signo y vuelva. (b) En la siguiente evaluación si la señal sigue en la misma dirección. | (a): evita reentrar en la misma tendencia que acaba de fallar; reduce operaciones | |
+| ID | Decisión | Justificación |
+|---|---|---|
+| H1-01 | (a) Signo de la rentabilidad acumulada de L días; siempre largo o corto | Definición estándar de momentum de series temporales |
+| H1-02 | L = 7 días, valor único | La referencia sitúa el efecto en la rentabilidad de la última semana |
+| H1-03 | (a) Evaluación diaria al cierre de 00:00 UTC | El plan la define como "diaria"; con evaluación semanal habría ≈130 operaciones en 5 años, por debajo del gate |
+| H1-04 | (a) Stop fijo a 2 × ATR(14) desde la entrada | Sin una segunda regla de salida; k = 2 mantiene la orden por encima del nocional mínimo en la mayoría de los días |
+| H1-05 | (a) Solo BTC | Ver sección 3 (exposición conjunta y nocional mínimo) |
+| H1-06 | (a) Sin salida por tiempo | La salida natural es el cambio de señal |
+| H1-07 | (a) Tras un stop, reentrada solo con cambio de señal | No reentrar en la misma tendencia que acaba de fallar |
 
 ## 11. Registro de cambios
 
 | Versión | Fecha | Cambio |
 |---|---|---|
-| v0 | 2026-10-23 | Borrador inicial con decisiones abiertas |
+| v0 | 2026-10-23 | Borrador con decisiones abiertas |
+| v1 | 2026-10-23 | Decisiones tomadas por delegación del propietario; universo reducido a BTC |

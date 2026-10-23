@@ -1,87 +1,104 @@
-# Pre-registro H2-v0: ruptura de canal en 4h con filtro de volatilidad
+# Pre-registro H2-v1: ruptura de canal en 4h con filtro de volatilidad
 
-- **ID:** H2 · **Versión:** v0 · **Prioridad:** Alta (plan §5)
-- **Estado:** BORRADOR (decisiones abiertas H2-01 a H2-08 y comunes C-01 a C-18)
-- **Fecha:** 2026-10-23 · **Autor:** borrador preparado para el propietario · **Aprobado por:** —
+- **ID:** H2 · **Versión:** v1 · **Prioridad:** Alta (plan §5)
+- **Estado:** LISTO PARA FUSIONAR (falta la aprobación del propietario y la fusión en `main`)
+- **Fecha:** 2026-10-23 · **Autor:** Claude, con decisiones delegadas por el propietario el 23-oct-2026 · **Aprobado por:** —
 - **Commit de fusión:** `________`
-- **Protocolo común:** `00-protocolo-comun.md` v0
+- **Protocolo común:** `00-protocolo-comun.md` v1
 
 ## 1. Hipótesis
 
-- **Enunciado [hipótesis]:** cuando el precio cierra fuera de su rango reciente en velas de 4h y la volatilidad cumple una condición definida a priori, el movimiento tiende a continuar lo suficiente como para dejar esperanza neta positiva después de costes, en ambas direcciones.
-- **H0:** esperanza neta por operación ≤ 0. **Alternativa:** esperanza neta por operación > 0.
-- **Base:** familia de reglas de ruptura de canal (tipo Donchian) usadas en seguimiento de tendencia. No hay una referencia académica fijada en el plan para esta variante **[por verificar si el propietario quiere citar una]**.
+- **Enunciado [hipótesis]:** cuando el precio cierra fuera de su rango de los últimos 10 días en velas de 4h **y la volatilidad de corto plazo está por encima de la de largo plazo**, el movimiento continúa lo suficiente como para dejar esperanza neta positiva después de costes, en ambas direcciones.
+- **H0:** esperanza neta por operación ≤ 0 R. **Alternativa:** > 0 R.
+- **Base:** familia de reglas de ruptura de canal (tipo Donchian) de seguimiento de tendencia. El filtro descarta rupturas en volatilidad decreciente, que suelen ser derivas sin impulso. No hay una referencia académica para esta variante concreta.
 
 ## 2. Datos
 
-- Velas de 4h (límites en 00, 04, 08, 12, 16 y 20 UTC) de los perpetuos del universo; contrato según C-01.
-- Funding histórico de esos contratos.
-- Periodo de investigación: inicio según C-03 → 2024-12-31. Holdout sellado: 2025-01-01 → fecha del gate.
+- Velas de 4h (límites en 00, 04, 08, 12, 16 y 20 UTC), velas diarias (para el universo) y funding de los perpetuos con margen en USDT (C-01).
+- Periodo de investigación: 2020-01-01 → 2024-12-31 (C-03). Holdout sellado: 2025-01-01 → fecha del gate.
+- **[por verificar en F3]** Que el archivo de Binance conserva los contratos deslistados; si no, el universo tiene sesgo de supervivencia y hay que declararlo antes de ejecutar.
 
-## 3. Universo
+## 3. Universo (H2-06)
 
-- **PENDIENTE (H2-06).** El plan no lo fija para H2; el proyecto contempla BTC, ETH y pocas alts líquidas.
-- BTC y ETH cuentan como una sola exposición (plan §3).
+- **BTC, ETH y las 8 alts más líquidas**, reconstituido el día 1 de cada mes a las 00:00 UTC:
+  - candidatas: perpetuos con margen en USDT con al menos 90 días de histórico en esa fecha;
+  - excluidos: BTC y ETH (ya incluidos), activos base que sean stablecoins, contratos de índices y activos tokenizados;
+  - orden: mediana del volumen diario en USDT de los 30 días anteriores; entran las 8 primeras.
+- Una posición abierta sigue su curso aunque el activo salga del universo; no se abren posiciones nuevas en activos fuera del universo.
+- BTC y ETH son una sola exposición (plan §3); no se crean otros grupos de correlación (H2-08).
 
 ## 4. Regla exacta
 
+Notación por activo: `H_t`, `L_t`, `C_t` = máximo, mínimo y cierre de la vela de 4h que termina en `t`; `ATR14_t` y `ATR100_t` = ATR de Wilder de 14 y 100 velas hasta `t` inclusive.
+
 ```
-para cada activo A del universo, al cierre de cada vela de 4h t:
-    canal_alto_t = máximo de los máximos de las N velas anteriores a t (sin incluir t)   # H2-01
-    canal_bajo_t = mínimo de los mínimos de las N velas anteriores a t (sin incluir t)
-    filtro_t     = FILTRO_VOLATILIDAD(velas hasta t)                                     # H2-02
-    si cierre_t > canal_alto_t y filtro_t y no hay largo abierto -> ENTER_LONG en la apertura de t+1
-    si cierre_t < canal_bajo_t y filtro_t y no hay corto abierto -> ENTER_SHORT en la apertura de t+1
-    stop inicial = STOP(...)                                                              # H2-03
-    salida       = SALIDA(...)                                                            # H2-04
-    tamaño       = motor de riesgo
+canal_alto_t  = max(H_{t-60} … H_{t-1})        # 60 velas = 10 días, sin la vela t
+canal_bajo_t  = min(L_{t-60} … L_{t-1})
+salida_alta_t = max(H_{t-20} … H_{t-1})        # 20 velas ≈ 3.3 días
+salida_baja_t = min(L_{t-20} … L_{t-1})
+filtro_t      = ATR14_t > ATR100_t
+
+ruptura_larga_t = C_t > canal_alto_t  y  C_{t-1} <= canal_alto_{t-1}     # nueva ruptura
+ruptura_corta_t = C_t < canal_bajo_t  y  C_{t-1} >= canal_bajo_{t-1}
+
+al cierre de cada vela t, para cada activo del universo sin posición:
+    si ruptura_larga_t y filtro_t -> ENTER_LONG en la apertura de t+1, stop = entrada - 2 × ATR14_t
+    si ruptura_corta_t y filtro_t -> ENTER_SHORT en la apertura de t+1, stop = entrada + 2 × ATR14_t
+con posición larga: salir en la apertura de t+1 si C_t < salida_baja_t, o en el stop
+con posición corta: salir en la apertura de t+1 si C_t > salida_alta_t, o en el stop
+tamaño: motor de riesgo, 0.5% del capital; si queda por debajo del nocional mínimo, no se opera
 ```
 
-- **[fijado, ADR-004]** La ruptura se evalúa con el **cierre** de una vela de 4h ya cerrada; no hay órdenes de entrada intra-vela sobre el nivel del canal.
-- **4.2 Dirección:** largo y corto **[fijado, plan §5]**, sujeto a C-16.
+- La condición de "nueva ruptura" exige que la vela anterior no estuviera ya fuera del canal: tras una salida o un stop, solo se vuelve a entrar con una ruptura nueva (H2-05).
+- **[fijado, ADR-004]** Solo velas cerradas; sin órdenes de entrada intra-vela.
+- **4.2 Dirección:** largo y corto; cortos sujetos a C-16.
+- **4.5 Posiciones simultáneas (H2-07):** máximo 1 por activo; el resto lo limita el motor de riesgo (apalancamiento ≤2×, pérdida diaria/semanal, BTC+ETH como una exposición). Las señales vetadas se registran con el motivo y no cuentan como operaciones.
 
-## 5. Parámetros y rangos permitidos
+## 5. Parámetros
 
-Ningún valor está decidido.
+| Parámetro | Valor pre-registrado | Variantes ±20% |
+|---|---|---|
+| N: velas del canal de entrada | 60 | 48, 72 |
+| M: velas del canal de salida | 20 | 16, 24 |
+| ATR corto (velas) | 14 | 11, 17 |
+| ATR largo (velas) | 100 | 80, 120 |
+| k: múltiplo de ATR del stop | 2 | 1.6, 2.4 |
 
-| Parámetro | Rejilla candidata | Rango para la prueba ±20% | Pregunta |
-|---|---|---|---|
-| N: velas del canal de entrada | {20, 55} o {30, 60, 120} | ±20% | H2-01 |
-| Parámetros del filtro de volatilidad | según la opción de H2-02 | ±20% | H2-02 |
-| k: múltiplo de ATR del stop inicial | {2, 3} | ±20% | H2-03 |
-| M: velas del canal de salida | {10, 20} | ±20% | H2-04 |
+- Especificaciones principales: **1** (C-04). Rejilla de robustez completa para el PBO: 3⁵ = 243 variantes.
+- El universo (8 alts, 30 días, 90 días de historia) no forma parte de la prueba ±20%: es una definición, no un parámetro de la regla.
 
 ## 6. Costes asumidos
 
-Según el protocolo común (C-14). En alts, slippage más alto que en BTC/ETH.
+Los del protocolo común (C-14): comisión taker 0.05% por lado; slippage por lado 0.05% en BTC/ETH y 0.10% en alts, el doble en stops; funding histórico real; stress ×1.5 en el gate.
 
 ## 7. Protocolo de validación
 
-Según C-04, C-10, C-11, C-15 y C-16.
+Parámetros fijados a priori (C-04). PBO sobre la rejilla de 243 variantes (C-10); DSR con N de C-11. Sensibilidad informativa de entrada diurna (C-18).
 
 ## 8. Métricas y gate de la F4
 
-Gate del plan §5 sin cambios, con las definiciones del protocolo común.
+Gate del plan §5 sin cambios, con las definiciones del protocolo común v1.
 
 ## 9. Criterios de invalidación
 
-Los mismos que H1 (sección 9 de `H1-momentum-series-temporales-diario.md`).
+Los mismos que H1, más: construir el universo con información posterior a la fecha de reconstitución.
 
-## 10. Decisiones abiertas
+## 10. Decisiones
 
-| ID | Pregunta | Opciones | Recomendación (no es decisión) | Decisión del propietario |
-|---|---|---|---|---|
-| H2-01 | ¿Qué canal define la ruptura y con qué N? | (a) Máximo/mínimo de N velas de 4h, N ∈ {20, 55}. (b) N ∈ {30, 60, 120} (5, 10 y 20 días). (c) Un único N fijado ahora. | (c) con N = 60 (10 días) para limitar pruebas; o (b) si se prefiere rejilla | |
-| H2-02 | ¿Qué es el "filtro de volatilidad" y en qué sentido filtra? El plan no lo define. | (a) **Compresión previa:** solo se opera si el ATR(14)/precio estaba en el tercil inferior de sus últimas 180 velas antes de la ruptura. (b) **Expansión:** solo si ATR(14) > ATR(100). (c) **Mínimo de volatilidad:** solo si ATR(14)/precio supera un umbral (evitar mercados muertos). (d) **Máximo de volatilidad:** no operar si ATR(14)/precio supera un umbral (evitar caos). | Pregunta clave: (a) y (b) son hipótesis opuestas. Elegir una sola para no duplicar pruebas | |
-| H2-03 | ¿Stop inicial? | (a) k × ATR(14) desde la entrada. (b) El lado opuesto de un canal más corto (M velas). (c) Punto medio del canal de entrada. | (a): distancia al stop estable y fácil de dimensionar | |
-| H2-04 | ¿Salida? | (a) Ruptura del canal opuesto de M velas (estilo Turtle). (b) Trailing de k × ATR desde el extremo favorable. (c) Salida por tiempo tras T velas. (d) Objetivo fijo en R. | (a), sin objetivo fijo: es coherente con una hipótesis de continuación | |
-| H2-05 | Tras un stop, ¿cuándo se puede volver a entrar? | (a) Solo con una nueva ruptura posterior al stop. (b) En cualquier vela que cumpla la regla. | (a) | |
-| H2-06 | ¿Universo? | (a) Solo BTC y ETH. (b) BTC, ETH y las K alts más líquidas (definición como en H3-01). | (a) para la primera versión: costes conocidos y datos más largos; (b) da más muestra | |
-| H2-07 | ¿Cuántas posiciones simultáneas? | (a) Las que permita el motor de riesgo (apalancamiento ≤2×, pérdidas diaria/semanal). (b) Máximo 1 por activo y Q en total. | (a), con 1 por activo | |
-| H2-08 | Si el universo incluye alts, ¿se agrupan por correlación además de BTC+ETH? | (a) No; solo BTC+ETH (plan §3). (b) Sí, con un umbral de correlación fijado ahora. | (a); ampliar requiere cambiar límites de riesgo mediante ADR | |
+| ID | Decisión | Justificación |
+|---|---|---|
+| H2-01 | (c) Un único N = 60 velas (10 días) | Sin rejilla de selección (C-04) |
+| H2-02 | **(b) Expansión: ATR(14) > ATR(100)** en la vela de señal | Hipótesis con la lectura económica más directa (las rupturas con volatilidad creciente son impulso; las de volatilidad decreciente, deriva) y que conserva muestra; la compresión (a) es una hipótesis distinta y, si se quiere probar, va en otro pre-registro |
+| H2-03 | (a) Stop fijo a 2 × ATR(14) desde la entrada | Distancia estable; con ATR de 4h la orden queda por encima del nocional mínimo |
+| H2-04 | (a) Salida por el canal opuesto de 20 velas, sin objetivo fijo | Coherente con una hipótesis de continuación |
+| H2-05 | (a) Reentrada solo con una ruptura nueva | Implementado con la condición de "nueva ruptura" |
+| H2-06 | **(b) BTC, ETH y las 8 alts más líquidas** (*cambio respecto a la recomendación de la v0*) | Con solo BTC y ETH, una ruptura de 10 días con filtro generaría del orden de 15-20 operaciones al año en total (estimación teórica): unas 80-100 en 5 años, muy por debajo de 200. El plan contempla "pocas alts líquidas" |
+| H2-07 | (a) Lo que permita el motor de riesgo, máximo 1 por activo | Un único conjunto de límites |
+| H2-08 | (a) Solo el grupo BTC+ETH del plan | Ampliar grupos es cambiar límites de riesgo (ADR) |
 
 ## 11. Registro de cambios
 
 | Versión | Fecha | Cambio |
 |---|---|---|
-| v0 | 2026-10-23 | Borrador inicial con decisiones abiertas |
+| v0 | 2026-10-23 | Borrador con decisiones abiertas |
+| v1 | 2026-10-23 | Decisiones tomadas por delegación del propietario; universo ampliado a 8 alts líquidas; regla de "nueva ruptura" explícita |
