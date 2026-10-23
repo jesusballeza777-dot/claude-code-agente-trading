@@ -16,7 +16,9 @@ pre-registro esté **fusionado** en esta carpeta con hash de commit. Toda varian
 Las decisiones pueden tomarlas el propietario o Claude por delegación explícita del propietario; en ese caso el
 documento lo dice. En ambos casos la fusión en `main` requiere la aprobación del propietario.
 
-Un pre-registro fusionado no se edita. Cualquier cambio de regla, parámetro, universo o coste es un **pre-registro nuevo**
+Un pre-registro fusionado no cambia de contenido. La única edición posterior permitida es anotar su estado y el hash
+del commit de fusión (`git diff 4614d65 -- research/preregistration` muestra que solo cambiaron esos campos).
+Cualquier cambio de regla, parámetro, universo o coste es un **pre-registro nuevo**
 (nueva versión, `H1-v2`), y las pruebas hechas con la versión anterior siguen contando en `trials.csv` para el DSR.
 
 ## Contenido
@@ -24,11 +26,11 @@ Un pre-registro fusionado no se edita. Cualquier cambio de regla, parámetro, un
 | Fichero | Contenido | Estado |
 |---|---|---|
 | [`TEMPLATE.md`](TEMPLATE.md) | Plantilla de pre-registro | — |
-| [`00-protocolo-comun.md`](00-protocolo-comun.md) | Datos, costes, validación y definiciones del gate comunes | v1 · LISTO PARA FUSIONAR |
-| [`H1-momentum-series-temporales-diario.md`](H1-momentum-series-temporales-diario.md) | H1: momentum de series temporales diario en BTC | v1 · LISTO PARA FUSIONAR |
-| [`H2-ruptura-canal-4h.md`](H2-ruptura-canal-4h.md) | H2: ruptura de canal en 4h con filtro de expansión de volatilidad | v1 · LISTO PARA FUSIONAR |
+| [`00-protocolo-comun.md`](00-protocolo-comun.md) | Datos, costes, validación y definiciones del gate comunes | v1 · FUSIONADO (`4614d65`) |
+| [`H1-momentum-series-temporales-diario.md`](H1-momentum-series-temporales-diario.md) | H1: momentum de series temporales diario en BTC | v1 · FUSIONADO (`4614d65`) |
+| [`H2-ruptura-canal-4h.md`](H2-ruptura-canal-4h.md) | H2: ruptura de canal en 4h con filtro de expansión de volatilidad | v1 · FUSIONADO (`4614d65`) |
 | [`H3-momentum-transversal-alts.md`](H3-momentum-transversal-alts.md) | H3: momentum transversal en alts, neutral al mercado | APLAZADO (F9) |
-| [`H4-filtro-funding-oi.md`](H4-filtro-funding-oi.md) | H4: filtro de funding extremo sobre H1 y H2 | v1 · LISTO PARA FUSIONAR |
+| [`H4-filtro-funding-oi.md`](H4-filtro-funding-oi.md) | H4: filtro de funding extremo sobre H1 y H2 | v1 · FUSIONADO (`4614d65`) |
 | [`PREGUNTAS-ABIERTAS.md`](PREGUNTAS-ABIERTAS.md) | Registro de todas las decisiones (antes, preguntas abiertas) | — |
 
 ## `research/trials.csv`

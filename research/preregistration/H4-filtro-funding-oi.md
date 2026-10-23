@@ -1,9 +1,9 @@
 # Pre-registro H4-v1: filtro de funding extremo
 
 - **ID:** H4 · **Versión:** v1 · **Prioridad:** Media (plan §5)
-- **Estado:** LISTO PARA FUSIONAR (aprobado por el propietario; pendiente solo de la fusión en `main`)
+- **Estado:** FUSIONADO en `main` el 23-oct-2026 (PR #1)
 - **Fecha:** 2026-10-23 · **Autor:** Claude, con decisiones delegadas por el propietario el 23-oct-2026 · **Aprobado por:** propietario, 23-oct-2026
-- **Commit de fusión:** `________`
+- **Commit de fusión:** `4614d659247e57ef6f01614b4986c125fe5468f9`
 - **Protocolo común:** `00-protocolo-comun.md` v1
 
 ## 1. Hipótesis
