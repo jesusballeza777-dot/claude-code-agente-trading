@@ -71,8 +71,40 @@
    - Cada filtro aleatorio quita `k` operaciones al azar de la lista de operaciones de la base y calcula la esperanza del resto; 10,000 repeticiones, semilla 20261023.
    - La comparación usa el percentil 90.
 
+## 6. Detalles de implementación (v1.1)
+
+Escritos antes de descargar el dataset y antes de cualquier backtest; hasta aquí solo se inspeccionó el formato de 5 ficheros de muestra (cabecera y 3 filas de cada uno). Tampoco cambian reglas, parámetros, umbrales ni costes: fijan cómo se implementan los puntos anteriores.
+
+1. **Rango verdadero de la primera vela:** la primera vela de cada serie no tiene cierre anterior y no produce rango verdadero. El primero sale de la segunda vela, y ATR(n) existe desde la vela n + 1 (semilla: media simple de los n primeros rangos).
+2. **Universo vigente:** en cada instante `t` rige el universo de la última reconstitución `D ≤ t`. La vela de 4h que cierra justo en `D` ya usa el universo nuevo (que solo mira datos hasta `D − 1`).
+3. **Varias señales en la misma vela:**
+   - Primero se ejecutan las salidas y después las entradas.
+   - Las entradas se presentan al motor de riesgo en el orden del universo (mediana de `quote_volume`, de mayor a menor) y cada aprobada cuenta para la siguiente.
+   - En H1 (un solo activo) la salida por cambio de señal y la nueva entrada ocurren en la misma apertura.
+4. **Tamaño y riesgo planificado:**
+   - En la apertura de `t + 1` el precio de ejecución es `P = apertura × (1 ± s)` y el stop es `P ∓ k × ATR_t`.
+   - El tamaño lo da `size_by_risk` con el capital a mercado al cierre de `t`, el 0.5% de riesgo y `CostModel(comisión = 0.05%, slippage = s)`. El motor evalúa la propuesta con el mismo modelo de costes.
+   - El riesgo planificado (denominador de R) es `trade_risk` del motor con ese modelo. Como `P` ya incluye el slippage de entrada, el motor lo cuenta dos veces: sobreestima un poco el riesgo, lo que es conservador.
+   - El tope de nocional de `size_by_risk` es el apalancamiento que queda libre (2× del capital menos el nocional abierto).
+5. **Stops:**
+   - Se comprueban desde la vela de entrada inclusive.
+   - Largo: si `apertura ≤ stop`, la salida es `apertura × (1 − 2s)`; si no, y `mínimo ≤ stop`, la salida es `stop × (1 − 2s)`. Corto: simétrico.
+6. **Riesgo de las posiciones abiertas** (`OpenPosition.risk_to_stop`): pérdida adicional, con la comisión y el slippage de stop (2s), si saltara el stop desde el cierre actual; 0 si el stop protege beneficio.
+7. **Paradas del motor en el backtest:**
+   - El drawdown se mide sobre el capital a mercado al cierre de cada vela.
+   - Si salta el corte duro (20%), se cierran todas las posiciones en la apertura siguiente y no se abren más en toda la corrida (no hay propietario que lo rearme).
+   - La parada del 15% bloquea entradas mientras dure.
+8. **Funding y holdout:**
+   - El funding con `calc_time ≥ 2025-01-01 00:00 UTC` pertenece al holdout y no se lee.
+   - Una posición cerrada por `FIN_DE_PERIODO` no paga la liquidación de las 00:00 del 1-ene-2025.
+   - Las salidas por fin de periodo usan el cierre de la última vela (que cierra a las 00:00 del 1-ene-2025) con slippage `s`.
+9. **H4, "liquidadas antes del cierre de t":** `calc_time < t`, estrictamente.
+10. **Deslistados:** el cierre por `DESLISTADO` aplica slippage `s` y comisión, como una salida por regla.
+11. **Descarga:** solo se descargan los meses hasta 2024-12 inclusive; los ficheros del holdout no se descargan en la F3.
+
 ## Registro de cambios
 
 | Versión | Fecha | Cambio |
 |---|---|---|
 | v1 | 2026-10-23 | Versión inicial, antes de cualquier dato o backtest |
+| v1.1 | 2026-10-23 | Sección 6: detalles de implementación del backtester, escritos antes de descargar precios |
