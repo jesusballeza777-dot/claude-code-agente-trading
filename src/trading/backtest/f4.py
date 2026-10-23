@@ -614,6 +614,10 @@ def run_f4(ctx: Context) -> dict[str, Any]:
     return {"gates": gates, "universo": len(union), "sharpes_principales": ctx.principal_sharpes}
 
 
+def _num(value: float | None, decimals: int) -> str:
+    return "—" if value is None else f"{value:.{decimals}f}"
+
+
 def clean_code_commit() -> str:
     """Commit del código usado; falla si `src/` tiene cambios sin commit (reproducibilidad)."""
     import subprocess  # nosec B404 - solo git local
@@ -659,18 +663,25 @@ def write_summary(outcome: Mapping[str, Any], ctx: Context, path: Path) -> None:
             "|---|---|",
         ]
         lines += [f"| {name} | {'sí' if ok else 'no'} |" for name, ok in item["criterios"].items()]
+        sides = values["por_direccion"]
+        share = values["max_peso_mes"]
         lines += [
             "",
             f"- Operaciones: {values['operaciones']}; esperanza {values['esperanza_r']:+.3f} R; "
             f"IC90% [{values['ic90_r'][0]:+.3f}, {values['ic90_r'][1]:+.3f}] R.",
-            f"- PF: {values['pf']}; DSR: {values['dsr']:.3f}; PBO: {values['pbo']:.3f}; "
+            f"- PF: {_num(values['pf'], 2)}; DSR: {values['dsr']:.3f}; PBO: {values['pbo']:.3f}; "
             f"MaxDD p95 (Monte Carlo): {values['maxdd_p95_mc']:.1%}.",
             f"- Costes ×1.5, IC90%: [{values['costes_x1.5_ic90'][0]:+.3f}, "
             f"{values['costes_x1.5_ic90'][1]:+.3f}] R.",
             "- Regímenes positivos (≥20 operaciones): "
             f"{', '.join(values['regimenes_positivos']) or 'ninguno'}.",
-            f"- Mayor peso de un mes: {values['max_peso_mes']}.",
-            f"- Por dirección: {json.dumps(values['por_direccion'], ensure_ascii=False)}.",
+            f"- Mayor peso de un mes: {'—' if share is None else f'{share:.1%}'}.",
+            "- Por dirección: "
+            + "; ".join(
+                f"{side.lower()} {v['n']} operaciones, {v['esperanza_r']:+.3f} R"
+                for side, v in sides.items()
+            )
+            + ".",
             f"- Cortos (C-16): {values['c16_cortos']}.",
             "",
         ]
@@ -678,11 +689,36 @@ def write_summary(outcome: Mapping[str, Any], ctx: Context, path: Path) -> None:
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def rewrite_summary(results_dir: Path, summary: Path) -> None:
+    """Resumen desde los resultados guardados, con la procedencia de la corrida original."""
+    outcome = json.loads((results_dir / "gate-f4.json").read_text(encoding="utf-8"))
+    first = json.loads((results_dir / "T0001.json").read_text(encoding="utf-8"))
+    ctx = Context(
+        store=Store(),
+        registry=None,  # type: ignore[arg-type]
+        dataset_id=first["dataset_id"],
+        prereg=first["prereg"],
+        results_dir=results_dir,
+        regimes={},
+        code_commit=first.get("codigo_commit", ""),
+    )
+    write_summary(outcome, ctx, summary)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="F4: backtests de H1, H2 y H4 en 2020-2024")
     parser.add_argument("--results-dir", type=Path, default=RESULTS_DIR)
     parser.add_argument("--summary", type=Path, default=SUMMARY_PATH)
+    parser.add_argument(
+        "--solo-resumen",
+        action="store_true",
+        help="rehace el resumen desde gate-f4.json sin volver a correr nada",
+    )
     args = parser.parse_args(argv)
+    if args.solo_resumen:
+        rewrite_summary(args.results_dir, args.summary)
+        print(f"resumen en {args.summary}")
+        return 0
     clarifications = verify_frozen_preregistration()
     code_commit = clean_code_commit()
     store = Store()
@@ -699,7 +735,7 @@ def main(argv: list[str] | None = None) -> int:
     with localcontext(RISK_DECIMAL_CONTEXT):
         outcome = run_f4(ctx)
     gate_path = args.results_dir / "gate-f4.json"
-    gate_path.write_text(json.dumps(outcome, indent=1, default=str), encoding="utf-8")
+    gate_path.write_text(json.dumps(outcome, indent=1, default=str) + "\n", encoding="utf-8")
     write_summary(outcome, ctx, args.summary)
     print(f"gate en {gate_path}; resumen en {args.summary}")
     return 0

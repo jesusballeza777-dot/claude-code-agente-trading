@@ -1,0 +1,247 @@
+{
+ "gates": [
+  {
+   "hipotesis": "H1-v1",
+   "criterios": {
+    "1_operaciones_>=200": false,
+    "2_ic90_inferior_>0": false,
+    "3_pf_>=1.25": true,
+    "4a_dsr_>=0.90": false,
+    "4b_pbo_<=0.30": false,
+    "5_maxdd_p95_mc_<=25%": true,
+    "6a_parametros_\u00b120%_esperanza_>0": true,
+    "6b_costes_x1.5_ic90_inferior_>0": false,
+    "7_positiva_en_>=2_de_3_regimenes": true,
+    "8_ningun_mes_>30%": false
+   },
+   "pasa_gate_sin_holdout": false,
+   "holdout": "sellado: el criterio 9 se eval\u00faa una sola vez en el gate con autorizaci\u00f3n",
+   "valores": {
+    "operaciones": 127,
+    "esperanza_r": 0.1026755472820058,
+    "ic90_r": [
+     -0.08933319271803263,
+     0.31745805398176247
+    ],
+    "pf": 1.3558248488389717,
+    "dsr": 0.5955645081310718,
+    "pbo": 0.3213675213675214,
+    "maxdd_p95_mc": 0.09086703273369216,
+    "variantes_\u00b120%": {
+     "lookback=6": 0.08155254454859377,
+     "atr_period=11": 0.09482689265369786,
+     "atr_multiple=1.6": 0.10976012167946539,
+     "atr_multiple=2.4": 0.2315466405207249,
+     "atr_period=17": 0.10867770230087163,
+     "lookback=8": 0.2297610526363228
+    },
+    "costes_x1.5_ic90": [
+     -0.13686737430495097,
+     0.2838546510609307
+    ],
+    "regimenes_positivos": [
+     "alcista",
+     "bajista"
+    ],
+    "max_peso_mes": 0.6863069899455998,
+    "por_direccion": {
+     "LONG": {
+      "n": 66,
+      "esperanza_r": 0.36542569753351634
+     },
+     "SHORT": {
+      "n": 61,
+      "esperanza_r": -0.18161150053110395
+     }
+    },
+    "c16_cortos": "habilitables solo si el gate pasa y cada direcci\u00f3n tiene esperanza > 0: no"
+   }
+  },
+  {
+   "hipotesis": "H2-v1",
+   "criterios": {
+    "1_operaciones_>=200": true,
+    "2_ic90_inferior_>0": true,
+    "3_pf_>=1.25": true,
+    "4a_dsr_>=0.90": true,
+    "4b_pbo_<=0.30": false,
+    "5_maxdd_p95_mc_<=25%": true,
+    "6a_parametros_\u00b120%_esperanza_>0": true,
+    "6b_costes_x1.5_ic90_inferior_>0": true,
+    "7_positiva_en_>=2_de_3_regimenes": true,
+    "8_ningun_mes_>30%": true
+   },
+   "pasa_gate_sin_holdout": false,
+   "holdout": "sellado: el criterio 9 se eval\u00faa una sola vez en el gate con autorizaci\u00f3n",
+   "valores": {
+    "operaciones": 272,
+    "esperanza_r": 0.5163387604509023,
+    "ic90_r": [
+     0.20722283818396237,
+     0.8471430549858469
+    ],
+    "pf": 1.8648705924088398,
+    "dsr": 0.9923499905469948,
+    "pbo": 0.4564102564102564,
+    "maxdd_p95_mc": 0.19242580593837788,
+    "variantes_\u00b120%": {
+     "channel=48": 0.5444104837180125,
+     "exit_channel=16": 0.4920378910365019,
+     "atr_short=11": 0.5134761021256218,
+     "atr_long=80": 0.5284642793236285,
+     "atr_multiple=1.6": 0.2818367228238905,
+     "atr_multiple=2.4": 0.4056291402019934,
+     "atr_long=120": 0.47551254455303976,
+     "atr_short=17": 0.612964265195976,
+     "exit_channel=24": 0.5134492386169726,
+     "channel=72": 0.42238873532514337
+    },
+    "costes_x1.5_ic90": [
+     0.14082003860510084,
+     0.7352621511301353
+    ],
+    "regimenes_positivos": [
+     "alcista",
+     "bajista",
+     "lateral"
+    ],
+    "max_peso_mes": 0.23818876781736512,
+    "por_direccion": {
+     "LONG": {
+      "n": 166,
+      "esperanza_r": 0.8975440980235372
+     },
+     "SHORT": {
+      "n": 106,
+      "esperanza_r": -0.08064318329492212
+     }
+    },
+    "c16_cortos": "habilitables solo si el gate pasa y cada direcci\u00f3n tiene esperanza > 0: no"
+   }
+  },
+  {
+   "hipotesis": "H4-H1-v1",
+   "criterios": {
+    "1_operaciones_>=200": false,
+    "2_ic90_inferior_>0": false,
+    "3_pf_>=1.25": true,
+    "4a_dsr_>=0.90": false,
+    "4b_pbo_<=0.30": false,
+    "5_maxdd_p95_mc_<=25%": true,
+    "6a_parametros_\u00b120%_esperanza_>0": true,
+    "6b_costes_x1.5_ic90_inferior_>0": false,
+    "7_positiva_en_>=2_de_3_regimenes": true,
+    "8_ningun_mes_>30%": false,
+    "h4_k_>=20": false,
+    "h4_mejor_que_base": false,
+    "h4_mejor_que_p90_aleatorio": false
+   },
+   "pasa_gate_sin_holdout": false,
+   "holdout": "sellado: el criterio 9 se eval\u00faa una sola vez en el gate con autorizaci\u00f3n",
+   "valores": {
+    "operaciones": 127,
+    "esperanza_r": 0.10205841009298168,
+    "ic90_r": [
+     -0.0900083321617436,
+     0.3169898878252591
+    ],
+    "pf": 1.3529313273089947,
+    "dsr": 0.5930788168527595,
+    "pbo": 0.7024864024864025,
+    "maxdd_p95_mc": 0.09125219959727905,
+    "variantes_\u00b120%": {
+     "threshold_8h=0.0004": 0.10495106311505999,
+     "count=2": 0.10495106311505999,
+     "count=4": 0.10205841009298168,
+     "threshold_8h=0.0006": 0.10205841009298168
+    },
+    "costes_x1.5_ic90": [
+     -0.13686737430495097,
+     0.2838546510609307
+    ],
+    "regimenes_positivos": [
+     "alcista",
+     "bajista"
+    ],
+    "max_peso_mes": 0.6904570209542814,
+    "por_direccion": {
+     "LONG": {
+      "n": 66,
+      "esperanza_r": 0.3642381759728184
+     },
+     "SHORT": {
+      "n": 61,
+      "esperanza_r": -0.18161150053110395
+     }
+    },
+    "c16_cortos": "habilitables solo si el gate pasa y cada direcci\u00f3n tiene esperanza > 0: no"
+   }
+  },
+  {
+   "hipotesis": "H4-H2-v1",
+   "criterios": {
+    "1_operaciones_>=200": true,
+    "2_ic90_inferior_>0": true,
+    "3_pf_>=1.25": true,
+    "4a_dsr_>=0.90": true,
+    "4b_pbo_<=0.30": false,
+    "5_maxdd_p95_mc_<=25%": true,
+    "6a_parametros_\u00b120%_esperanza_>0": true,
+    "6b_costes_x1.5_ic90_inferior_>0": true,
+    "7_positiva_en_>=2_de_3_regimenes": true,
+    "8_ningun_mes_>30%": true,
+    "h4_k_>=20": false,
+    "h4_mejor_que_base": false,
+    "h4_mejor_que_p90_aleatorio": false
+   },
+   "pasa_gate_sin_holdout": false,
+   "holdout": "sellado: el criterio 9 se eval\u00faa una sola vez en el gate con autorizaci\u00f3n",
+   "valores": {
+    "operaciones": 264,
+    "esperanza_r": 0.4966019468222081,
+    "ic90_r": [
+     0.19896252775287396,
+     0.8251074481330478
+    ],
+    "pf": 1.8367912415467658,
+    "dsr": 0.9894352988878765,
+    "pbo": 0.718958818958819,
+    "maxdd_p95_mc": 0.18815982218102248,
+    "variantes_\u00b120%": {
+     "threshold_8h=0.0004": 0.47056447075719565,
+     "count=2": 0.5129905032803461,
+     "count=4": 0.512200189348926,
+     "threshold_8h=0.0006": 0.531525564652966
+    },
+    "costes_x1.5_ic90": [
+     0.13210716773733525,
+     0.7226274011876217
+    ],
+    "regimenes_positivos": [
+     "alcista",
+     "bajista",
+     "lateral"
+    ],
+    "max_peso_mes": 0.25515998325400235,
+    "por_direccion": {
+     "LONG": {
+      "n": 158,
+      "esperanza_r": 0.8753825395193299
+     },
+     "SHORT": {
+      "n": 106,
+      "esperanza_r": -0.06799554040557718
+     }
+    },
+    "c16_cortos": "habilitables solo si el gate pasa y cada direcci\u00f3n tiene esperanza > 0: no"
+   }
+  }
+ ],
+ "universo": 68,
+ "sharpes_principales": {
+  "H1-v1": 0.0725181586291691,
+  "H2-v1": 0.16260124290690173,
+  "H4-H1-v1": 0.07205289450912647,
+  "H4-H2-v1": 0.16009131685869848
+ }
+}
