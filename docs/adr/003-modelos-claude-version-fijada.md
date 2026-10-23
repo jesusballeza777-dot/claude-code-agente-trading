@@ -5,6 +5,8 @@
 - **Decide:** propietario del proyecto
 - **Fuentes:** plan maestro v2 §1 (#6), §4, §6, §8; CLAUDE.md reglas 3, 4 y 5
 
+> **Corrección del 23-oct-2026 (auditoría A-12):** este ADR afirmaba que las suscripciones no incluyen créditos de API. Es falso para Max: Max 5x incluye USD 100/mes en créditos de API para la consola ([centro de ayuda de Claude](https://support.claude.com/en/articles/17154008-api-credits-for-max-and-team-plans)). El analista se paga con esos créditos; ver `docs/presupuesto.md`. La decisión del ADR no cambia.
+
 ## Contexto
 
 - Claude es el eje del proyecto **[confirmado, plan §1 #6]**, pero el modelo no calcula ni ejecuta: tamaños, R/R, costes, apalancamiento, stops y límites los calcula código determinista con tests **[confirmado, CLAUDE.md regla 3]**.

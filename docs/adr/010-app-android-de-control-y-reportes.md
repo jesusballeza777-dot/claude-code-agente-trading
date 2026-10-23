@@ -1,6 +1,6 @@
 # ADR-010: App Android de control, dashboard y reportes
 
-- **Estado:** Aceptado (decisión del propietario del 23-oct-2026)
+- **Estado:** Aceptado (decisión del propietario del 23-oct-2026); **sustituido en parte por ADR-014** (23-oct-2026): la interfaz principal pasa a ser el Centro de Mando web y esta app queda como cliente ligero. Los principios de seguridad de este ADR siguen vigentes.
 - **Fecha:** 2026-10-23
 - **Decide:** propietario del proyecto
 - **Fuentes:** CLAUDE.md reglas 1 a 5; plan §4; ADR-006, ADR-008, ADR-009; especificación en `docs/app/especificacion.md`

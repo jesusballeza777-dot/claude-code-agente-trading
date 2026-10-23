@@ -1,7 +1,7 @@
 # Documento de requisitos v2
 
 **Estado:** vigente; recoge las decisiones del propietario del 23-oct-2026 · **Fecha:** 23-oct-2026
-**Fuente:** `docs/plan-maestro-v2.md` (22-oct-2026) y `CLAUDE.md`. Cada punto cita su sección de origen.
+**Fuente:** `docs/plan-maestro-v2.md` (22-oct-2026), su actualización `docs/plan-maestro-v2.1.md` y `CLAUDE.md`. Cada punto cita su sección de origen.
 No es asesoría financiera, legal ni fiscal.
 
 Etiquetas usadas: **[confirmado]** decisión del propietario o regla escrita en el plan/CLAUDE.md ·
@@ -58,7 +58,7 @@ con un capital de USD 1,500 en USDC **[confirmado, plan §1]**.
 |---|---|---|---|
 | S1 | El propietario dispone de USD 1,500 en USDC en una cuenta de Binance dedicada | confirmado (plan §1) | F1 |
 | S2 | Los futuros USDⓈ-M de Binance están habilitados para la cuenta en México (cuestionario de derivados superado y posibilidad de abrir posición) | **PENDIENTE** (plan §8) | F1 |
-| S3 | El analista usa una cuenta de API por consumo, aparte de la suscripción Max 5x (decisión del propietario, 23-oct-2026) | confirmado; coste estimado USD 5-15/mes por verificar en la F5 | F1, F5 |
+| S3 | El analista usa la API de Claude con los créditos mensuales incluidos en Max 5x (USD 100/mes) | **confirmado** en el centro de ayuda de Claude; uso estimado USD 5-15/mes, por medir en la F5 | F1 (reclamar créditos), F5 |
 | S4 | El propietario dedica 20 h/semana | confirmado (plan §1) | seguimiento semanal |
 | S5 | Los datos de futuros de Binance son gratuitos en el MVP | estimado (plan §6) | F3 |
 | S6 | El histórico de funding y OI necesario para H4 está disponible con la profundidad suficiente | **confirmado en parte** (23-oct-2026, archivo público de Binance): funding desde 2020-01; OI desde 2020-09 (BTC) y 2021-12 (ETH). H4 usa solo funding | F3 |
@@ -117,7 +117,7 @@ está en `research/preregistration/00-protocolo-comun.md` (C-05 a C-17).
 |---|---|
 | Dedicación | 20 h/semana |
 | Calendario hasta capital real | ~5-6 meses |
-| Gasto operativo | ~USD 110-117/mes según el plan §6; con Max 5x más la API por consumo, ≈USD 120-130/mes (**estimado**), ≈8% mensual del capital |
+| Gasto operativo | ≈USD 110-117/mes (**estimado**), ≈7.5% mensual del capital; fuente única: `docs/presupuesto.md` |
 | Shadow trading (F7) | ≥12 semanas |
 | Piloto real (F8) | 3 meses con USD 1,500 |
 
@@ -150,7 +150,7 @@ de gasto, horas y avance.
 |---|---|---|
 | Topes de parada (450 h, USD 900, 7 meses) | **Decidido:** rechazados por el propietario | §6.1, ADR-008 |
 | Confirmar Futuros USDⓈ-M habilitados en Binance para México | **PENDIENTE (F1)**, lo comprueba el propietario | S2, `docs/f1-verificacion-plataforma.md` |
-| Decidir entre Claude Max 5x y Pro + API | **Decidido:** Max 5x + API por consumo para el analista | S3, ADR-003 |
+| Decidir entre Claude Max 5x y Pro + API | **Decidido:** Max 5x; el analista usa sus créditos de API | S3, ADR-003, `presupuesto.md` |
 | Documento de requisitos v2 | Vigente | este documento |
 | ADR-001 a 008 | **Aceptados** por el propietario | `docs/adr/` |
 | Pre-registro | **Aprobado** por el propietario: protocolo común v1, H1-v1, H2-v1, H4-v1; H3 aplazada a la F9. Fusionado en `main`: commit `4614d65` | `research/preregistration/` |

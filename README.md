@@ -4,13 +4,15 @@ Agente de trading cripto con Claude: BTC, ETH y pocas alts líquidas en Binance 
 La rentabilidad no se da por supuesta; es la hipótesis que el sistema tiene que demostrar.
 No es asesoría financiera, legal ni fiscal.
 
-**Fase actual:** F0 (alcance y gobernanza) + cimientos de F2. No hay código que se conecte a exchanges
-y la ejecución real está desactivada (`LIVE_TRADING=false`).
+**Fase actual (ADR-012):** F0 cerrada; F1 pendiente del propietario; en curso F2, F3 con datos públicos (sin claves),
+F4 sobre 2020-2024 y el Centro de Mando. La ejecución real está desactivada (`LIVE_TRADING=false`).
 
 ## Documentos rectores
 
 - [`CLAUDE.md`](CLAUDE.md): reglas permanentes (secretos, ejecución real, veto del motor de riesgo, pre-registro).
-- [`docs/plan-maestro-v2.md`](docs/plan-maestro-v2.md): plan maestro v2 y decisiones del propietario.
+- [`docs/plan-maestro-v2.1.md`](docs/plan-maestro-v2.1.md): plan maestro vigente (el [v2](docs/plan-maestro-v2.md) queda como histórico).
+- [`docs/presupuesto.md`](docs/presupuesto.md): presupuesto mensual (fuente única).
+- [`docs/auditoria/`](docs/auditoria/): línea base y auditoría del 23-oct-2026.
 - `docs/requirements.md`, `docs/adr/`, `docs/risk_register.md`: requisitos, decisiones de arquitectura y riesgos.
 - `research/preregistration/`: pre-registro de hipótesis antes de cualquier backtest.
 - [`docs/f1-verificacion-plataforma.md`](docs/f1-verificacion-plataforma.md): comprobaciones que hace el propietario en Binance, Hyperliquid y Anthropic (F1).

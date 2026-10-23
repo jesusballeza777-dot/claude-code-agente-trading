@@ -41,8 +41,9 @@ Al autorizarla: un nombre fijo (por ejemplo `trading-agente`), desde MetaMask en
 
 ## 3. Claude: cuenta de API para el analista (ADR-003)
 
-- **Decidido el 23-oct-2026:** Max 5x para desarrollar y una cuenta de API por consumo para el analista.
-- Crear la cuenta en la consola de Anthropic con un prepago pequeño y un límite de gasto mensual (por ejemplo, USD 30).
+- **Decidido el 23-oct-2026:** Max 5x. **Corrección (auditoría A-12):** Max 5x incluye USD 100/mes en créditos de API ([centro de ayuda](https://support.claude.com/en/articles/17154008-api-credits-for-max-and-team-plans)); el analista los usa.
+- Tras 7 días en Max: claude.ai → Settings → Billing → "API credits" → **Link organization** (crea o elige la organización de la consola; solo se puede vincular una y no se puede cambiar).
+- Poner un límite de gasto mensual en la consola por si se agotan los créditos (por ejemplo, USD 30).
 - La clave de API **no** se comparte en el chat: se guarda cifrada con SOPS/age en la F5 (`ops/secrets.md`).
 - Con la cuenta creada se comprueba el identificador exacto del modelo con `GET /v1/models` y se fija en ADR-003.
 

@@ -1,0 +1,78 @@
+# Aclaraciones de implementación del pre-registro v1
+
+- **Aplica a:** protocolo común v1, H1-v1, H2-v1 y H4-v1 (fusionados en `4614d65`).
+- **Fecha:** 2026-10-23 · **Autor:** Claude, con la delegación del propietario del 23-oct-2026 y su confirmación del mismo día de que `4614d65` está congelado.
+- **Momento:** este documento se escribe y se versiona **antes** de descargar datos de mercado y antes de cualquier backtest. Ningún punto se decidió mirando resultados.
+- **Qué es y qué no es:** traduce a reglas exactas lo que el pre-registro dejaba sin concretar (auditoría `docs/auditoria/2026-10-23-auditoria.md`, hallazgos A-03 y A-04). **No cambia** ninguna regla, parámetro, umbral ni coste. Cada corrida en `research/trials.csv` anota el hash del pre-registro **y** el de este documento.
+
+## 1. Datos
+
+1. Fuente: archivo público de Binance (`data.binance.vision`, leído por su espejo `s3-ap-northeast-1.amazonaws.com/data.binance.vision`). Cada fichero se verifica con su `.CHECKSUM` SHA-256; un fichero que no cuadra no se usa.
+2. Velas identificadas por su hora de apertura (UTC); una vela de intervalo `I` abierta en `t` cierra en `t + I`.
+3. **Periodo de investigación:** velas con apertura ≥ 2020-01-01 00:00 UTC y cierre ≤ 2025-01-01 00:00 UTC. Los indicadores se calientan solo con datos del periodo, salvo las etiquetas de régimen (punto 6).
+4. Funding: ficheros `fundingRate` (`calc_time`, `funding_interval_hours`, `last_funding_rate`).
+5. Formatos: las velas spot no tienen cabecera y las de futuros recientes sí; las marcas de tiempo en microsegundos (spot desde 2025) se normalizan a milisegundos.
+6. **Regímenes (C-05):** cierres diarios del par **spot** BTCUSDT desde 2019-01-01 (solo para etiquetar). Media simple de 200 días y pendiente = media(t) − media(t − 20 días).
+
+## 2. Universo de H2
+
+1. **Candidatos:** símbolos del archivo de perpetuos USDⓈ-M que terminan en `USDT` y no contienen `_` (los que llevan `_` son futuros con vencimiento). Activo base = símbolo sin el sufijo `USDT`.
+2. **Exclusiones por activo base exacto** (la trampa: `TUSDT` y `BUSDT` son los tokens T y B, no stablecoins):
+   - Stablecoins y divisas: USDC, BUSD, TUSD, FDUSD, USDP, DAI, USDE, PYUSD, EUR, AEUR, USTC, USD1, RLUSD, USDBRL.
+   - Índices: BTCDOM, DEFI, FOOTBALL, BLUEBIRD.
+   - Activos tokenizados (acciones y metales): AAPL, AMZN, COIN, CRCL, GOOGL, HOOD, META, MSFT, MSTR, NVDA, QQQ, SPY, TSLA, PAXG, XAUT, XAU, XAG.
+   - Envoltorios de BTC o ETH: WBTC, WETH, WBETH, BETH, STETH, WSTETH, CBETH.
+3. **Elegibilidad en la fecha de reconstitución `D`** (día 1 de cada mes, 00:00 UTC): la primera vela diaria del símbolo abrió como mínimo 90 días antes de `D`, y el símbolo tiene vela diaria del día `D − 1` (sigue cotizando).
+4. **Orden:** mediana del `quote_volume` (USDT) de las velas diarias de los 30 días anteriores a `D` (días `D−30 … D−1` con datos). Empates por orden alfabético del símbolo.
+5. BTCUSDT y ETHUSDT forman parte del universo siempre que cumplan el punto 3.
+6. **Deslistados:** el archivo los conserva (verificado: LUNAUSDT hasta 2022-05, ANCUSDT, TOMOUSDT). Si un símbolo deja de tener velas con una posición abierta, la posición se cierra al último cierre disponible con motivo `DESLISTADO`.
+
+## 3. Indicadores y señales
+
+1. **ATR:** media de Wilder del rango verdadero, con semilla igual a la media simple de los primeros `n` rangos verdaderos. El rango verdadero usa el cierre anterior.
+2. **H1:** la primera posición se abre en la primera evaluación con señal definida (7 rentabilidades y ATR(14) disponibles). Señal 0 sin señal previa = sin posición.
+3. **Redondeo de las variantes ±20%** de parámetros enteros: al entero más cercano, con medio hacia arriba (por ejemplo, 7 × 0.8 = 5.6 → 6). Coincide con las tablas de los pre-registros.
+
+## 4. Ejecución simulada y costes
+
+1. **Precios con slippage (C-14):** la entrada a mercado se ejecuta a `apertura × (1 + s)` en largos y `apertura × (1 − s)` en cortos. Las salidas por regla y por fin de periodo aplican `s` en contra; los stops aplican `2s` en contra sobre el precio del stop, o sobre la apertura si hubo gap. `s` = 0.05% en BTC/ETH y 0.10% en alts.
+2. **Comisión:** taker 0.05% del nocional ejecutado, en la entrada y en la salida.
+3. **Funding:** se cobra o se paga en cada `calc_time` con `entrada < calc_time ≤ salida`. El nocional se valora con el cierre de la vela de 4h que cierra en o antes de `calc_time`. Los largos pagan si la tasa es positiva y los cortos si es negativa.
+4. **Fin del periodo:** las posiciones abiertas se cierran al último cierre anterior a 2025-01-01, con motivo `FIN_DE_PERIODO`, y cuentan como operaciones.
+5. **Motor de riesgo (C-12):** se usa el motor real con los **límites firmados de F7-F8** (`limits_f7_f8.toml`):
+   - Capital inicial USD 1,500, compuesto.
+   - Capital a mercado al cierre de cada vela; inicio de día y de semana a las 00:00 UTC (lunes para la semana).
+   - Apalancamiento del exchange 3× aislado (C-20).
+   - Margen de mantenimiento **estimado**: 0.4% en BTC y ETH, 2.5% en alts, sin importe de mantenimiento.
+   - Nocional mínimo (C-19): 100 USDT en BTC y ETH, 20 USDT en alts.
+   - Sin paso de cantidad.
+   - Las señales vetadas se registran con su motivo y no son operaciones.
+6. Las reglas **propuestas** del motor v1 (ADR-013) no forman parte de la corrida principal. Se ejecutan aparte como sensibilidad informativa (`tipo_muestra = sensibilidad`) y no cuentan en el DSR.
+
+## 5. Métricas del gate
+
+1. **R de una operación** = P&L neto / riesgo planificado, calculado por el motor al entrar e incluyendo los costes.
+2. **IC90% de la esperanza (C-08):** bootstrap percentil iid sobre las operaciones, 10,000 remuestreos, semilla 20261023. El remuestreo por bloques mensuales solo se usa para el Monte Carlo del drawdown (C-09).
+3. **MaxDD p95 (C-09):** se agrupan las operaciones por mes de salida y se remuestrean meses con reemplazo hasta el número de meses del periodo, 10,000 trayectorias, semilla 20261023. El capital evoluciona como `capital × (1 + 0.005 × R)`.
+4. **DSR (C-11):**
+   - SR = media(R) / desviación(R) por operación, sin anualizar; T = número de operaciones; asimetría γ₃ y curtosis γ₄ de R.
+   - N = filas `principal` de `trials.csv` en el momento del gate.
+   - SR₀ = √V · ((1 − γ) Φ⁻¹(1 − 1/N) + γ Φ⁻¹(1 − 1/(N·e))), con γ = 0.5772 (constante de Euler-Mascheroni) y V = varianza de los SR de las pruebas principales. Si N = 1, SR₀ = 0.
+   - DSR = Φ((SR − SR₀) √(T − 1) / √(1 − γ₃·SR + (γ₄ − 1)/4 · SR²)).
+5. **PBO (C-10):**
+   - Matriz de meses naturales (filas, de 2020-01 a 2024-12) por variantes de la rejilla completa ±20% (columnas), con la suma de R del mes.
+   - Los 60 meses se reparten en 16 bloques contiguos lo más iguales posible (12 bloques de 4 meses y 4 de 3).
+   - Métrica: media/desviación de los meses.
+   - Se recorren las C(16,8) = 12,870 combinaciones. PBO = fracción en que la mejor variante dentro de muestra queda por debajo de la mediana fuera de muestra (logit ≤ 0).
+6. **Regímenes (C-05):** cada operación toma la etiqueta del día de entrada.
+7. **Concentración (C-17):** se suman las R por mes de salida. Si el total es ≤ 0, el criterio falla.
+8. **H4, filtros aleatorios (H4-06):**
+   - `k` = entradas de la base que el filtro habría bloqueado.
+   - Cada filtro aleatorio quita `k` operaciones al azar de la lista de operaciones de la base y calcula la esperanza del resto; 10,000 repeticiones, semilla 20261023.
+   - La comparación usa el percentil 90.
+
+## Registro de cambios
+
+| Versión | Fecha | Cambio |
+|---|---|---|
+| v1 | 2026-10-23 | Versión inicial, antes de cualquier dato o backtest |

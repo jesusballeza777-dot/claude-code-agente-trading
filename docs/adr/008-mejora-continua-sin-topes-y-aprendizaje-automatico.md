@@ -5,6 +5,8 @@
 - **Decide:** propietario del proyecto
 - **Fuentes:** plan maestro v2 §3, §4, §8; CLAUDE.md reglas 3, 4, 6 y 7; ADR-005, ADR-006, ADR-007
 
+> **Corrección del 23-oct-2026 (auditoría A-13):** la cifra de gasto de las consecuencias (≈USD 120-130/mes) suponía pagar la API aparte. Con los créditos de API incluidos en Max 5x, el gasto estimado es ≈USD 110-117/mes (`docs/presupuesto.md`). La decisión del ADR no cambia.
+
 ## Contexto
 
 - El plan §8 proponía detener el proyecto si, sin llegar a la F8, se alcanzaban 450 h de construcción, USD 900 de gasto operativo o 7 meses.

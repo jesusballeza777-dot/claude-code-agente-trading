@@ -1,7 +1,7 @@
 # CLAUDE.md: reglas permanentes del proyecto
 
 Proyecto: agente de trading cripto con Claude (BTC, ETH y pocas alts líquidas; Binance spot + perpetuos USDⓈ-M y Hyperliquid con wallet de agente sin retiros, ADR-009; app Android de control, ADR-010).
-Documento rector: `docs/plan-maestro-v2.md`. Si algo aquí contradice al plan, avisa al propietario antes de actuar.
+Documento rector: `docs/plan-maestro-v2.1.md` (el v2 queda como histórico). Si algo aquí contradice al plan, avisa al propietario antes de actuar.
 
 ## Reglas que nunca se rompen
 
@@ -16,7 +16,7 @@ Documento rector: `docs/plan-maestro-v2.md`. Si algo aquí contradice al plan, a
 
 ## Forma de trabajar
 
-- Fase actual: **F0 cerrada (23-oct-2026). F1 (verificación de plataforma, la hace el propietario: `docs/f1-verificacion-plataforma.md`) + cimientos de F2**. No escribas código que se conecte a Binance hasta la F1/F3.
+- Fase actual (ADR-012): **F0 cerrada. F1 pendiente del propietario** (`docs/f1-verificacion-plataforma.md`). **En curso: F2, F3 con datos públicos (sin claves, solo `data.binance.vision`), F4 sobre 2020-2024 y el Centro de Mando.** Ningún código usa endpoints de cuenta, órdenes, retiro o transferencia hasta la F6.
 - Antes de añadir una dependencia o herramienta, justifica qué problema resuelve.
 - No declares nada terminado sin pruebas reproducibles; muestra la salida de los tests.
 - Distingue en los documentos: confirmado / estimado / hipótesis / por verificar.
@@ -30,7 +30,7 @@ Python 3.12 · uv con lockfile · pytest + hypothesis · ruff · mypy (strict en
 ## Estructura del repositorio
 
 ```
-docs/            plan-maestro-v2.md, requirements.md, risk_register.md, adr/
+docs/            plan-maestro-v2.1.md (v2 histórico), requirements.md, risk_register.md, presupuesto.md, adr/, auditoria/
 research/        preregistration/, trials.csv, notebooks/ (sin datos crudos)
 src/trading/     data/, features/, signals/, risk/, decision/, execution/, audit/, reporting/
 tests/           espejo de src/

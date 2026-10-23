@@ -32,6 +32,7 @@ Cualquier cambio de regla, parámetro, universo o coste es un **pre-registro nue
 | [`H3-momentum-transversal-alts.md`](H3-momentum-transversal-alts.md) | H3: momentum transversal en alts, neutral al mercado | APLAZADO (F9) |
 | [`H4-filtro-funding-oi.md`](H4-filtro-funding-oi.md) | H4: filtro de funding extremo sobre H1 y H2 | v1 · FUSIONADO (`4614d65`) |
 | [`PREGUNTAS-ABIERTAS.md`](PREGUNTAS-ABIERTAS.md) | Registro de todas las decisiones (antes, preguntas abiertas) | — |
+| [`ACLARACIONES-v1.md`](ACLARACIONES-v1.md) | Detalle de implementación de la v1 (universo, costes, métricas del gate), fijado antes de cualquier dato | v1 |
 
 ## `research/trials.csv`
 
