@@ -102,9 +102,54 @@ Escritos antes de descargar el dataset y antes de cualquier backtest; hasta aqu�
 10. **Deslistados:** el cierre por `DESLISTADO` aplica slippage `s` y comisión, como una salida por regla.
 11. **Descarga:** solo se descargan los meses hasta 2024-12 inclusive; los ficheros del holdout no se descargan en la F3.
 
+## 7. Detalles de implementación (v1.2)
+
+Escritos después de descargar y validar el dataset `48f73c7…` y **antes de ejecutar cualquier backtest sobre datos reales** (solo se han corrido pruebas con datos sintéticos). No cambian reglas, parámetros, umbrales ni costes.
+
+1. **Hora del funding:** el archivo registra cada liquidación con 0-47 ms de retraso sobre la hora en punto. `calc_time` se redondea hacia abajo al minuto.
+2. **Funding en la vela del stop:** el stop se supone al final de la vela en que salta, así que se cobran las liquidaciones estrictamente dentro de esa vela.
+3. **Costes ×1.5:**
+   - Se multiplican por 1.5 la comisión, el slippage (entradas, salidas y stops) y el funding **pagado**; el funding cobrado no cambia.
+   - El motor dimensiona con los costes multiplicados.
+4. **PF** = suma de R positivos / |suma de R negativos|.
+5. **Ambas direcciones (C-02):**
+   - El backtest usa los límites firmados de F7-F8 con `short_enabled_strategies = {hipótesis}`, porque sin eso no se podrían evaluar los cortos que exige C-16.
+   - Los límites firmados no cambian; habilitar cortos de verdad sigue C-16 y un ADR.
+6. **H4 con poco historial:** con menos de `count` liquidaciones previas, el filtro no actúa.
+7. **Rejilla de H4 para el PBO:**
+   - Umbral {0.04, 0.05, 0.06}% × liquidaciones {2, 3, 4} (9 variantes), con los parámetros de la base fijos.
+   - El criterio ±20% usa las 4 variantes de un solo parámetro.
+8. **Prueba anti look-ahead:** además de los tests sintéticos (cambiar el futuro no cambia decisiones pasadas), se ejecuta la especificación principal con la ejecución retrasada una vela (`sensibilidad`). Se informa; no es criterio del gate.
+9. **Deslistado:** una serie cuya última vela cierra antes del fin del periodo.
+10. **Huecos en las velas:**
+    - Una salida pendiente espera a la siguiente vela del símbolo.
+    - Una entrada sin vela en la apertura de ejecución se registra como `SIN_VELA`.
+11. **Gap más allá de la liquidación:** el backtest ejecuta al precio de apertura del gap y no limita la pérdida al margen aislado. Es conservador.
+12. **Régimen de una operación:** la etiqueta del día UTC de la entrada (vela diaria spot que abre ese día).
+13. **Métricas:**
+    - Esperanza por semestre (C-04) y por dirección (C-16).
+    - El DSR usa N y V de las filas `principal` (H1, H2, H4-H1 y H4-H2), calculados cuando las cuatro están registradas.
+14. **H4, `k`:** operaciones ejecutadas de la base cuya señal habría bloqueado el filtro, evaluado en la hora de señal de cada una.
+15. **Sensibilidad v1 (ADR-013):**
+    - Reglas de exposición (beta-ajustada, alts y posiciones) y de funding, con el tamaño recortado a los topes.
+    - Beta = pendiente MCO de los rendimientos logarítmicos diarios del activo frente a BTC en los 90 días anteriores a cada reconstitución `D` (BTC = 1).
+    - Funding = última liquidación normalizada a 8 h.
+    - Depeg, ventana macro, volatilidad, liquidez y errores de la API no se evalúan.
+16. **Corridas previstas** (declaradas antes de ejecutar):
+
+    | Hipótesis | Principal | Robustez (rejilla) | Costes ×1.5 | Sensibilidad |
+    |---|---|---|---|---|
+    | H1-v1 | 1 | 26 | 1 | +1 vela |
+    | H2-v1 | 1 | 242 | 1 | C-18, ADR-013 y +1 vela |
+    | H4-H1-v1 | 1 | 8 | 1 | — |
+    | H4-H2-v1 | 1 | 8 | 1 | — |
+
+17. **Campo `prereg_commit` de `trials.csv`:** `4614d65…;aclaraciones=<hash del commit vigente de este documento>`.
+
 ## Registro de cambios
 
 | Versión | Fecha | Cambio |
 |---|---|---|
 | v1 | 2026-10-23 | Versión inicial, antes de cualquier dato o backtest |
 | v1.1 | 2026-10-23 | Sección 6: detalles de implementación del backtester, escritos antes de descargar precios |
+| v1.2 | 2026-10-23 | Sección 7: detalles de implementación y lista de corridas, escritos antes de cualquier backtest con datos reales |
