@@ -140,7 +140,7 @@ def test_toml_rejects_malformed_config(old: str, new: str, message: str) -> None
 def test_toml_rejects_section_that_is_not_a_table() -> None:
     text = _shipped_text()
     start = text.index("[exposure]")
-    end = text.index("# PROPUESTO")
+    end = text.index("[data_freshness]")  # no depende de los comentarios del fichero
     broken = text[:start] + text[end:]
     broken = broken.replace("[risk]", 'exposure = "x"\n\n[risk]', 1)
     with pytest.raises(InvalidRiskLimitsError, match="tabla"):
