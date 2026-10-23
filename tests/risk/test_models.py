@@ -105,3 +105,13 @@ def test_market_snapshot_requires_timezone(market: MarketSnapshot) -> None:
 
 def test_margin_mode_values() -> None:
     assert {m.value for m in MarginMode} == {"ISOLATED", "CROSS"}
+
+
+def test_perpetual_terms_require_a_liquidation_model(perp_terms: PerpetualTerms) -> None:
+    with pytest.raises(TypeError, match="LiquidationModel"):
+        replace(perp_terms, liquidation_model="BINANCE_USDM_ISOLATED")  # type: ignore[arg-type]
+
+
+def test_min_notional_cannot_be_negative(long_btc: EntryProposal) -> None:
+    with pytest.raises(ValueError, match="min_notional"):
+        replace(long_btc, min_notional=Decimal(-1))

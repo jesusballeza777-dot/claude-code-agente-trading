@@ -9,6 +9,7 @@ from trading.risk import (
     AccountState,
     CostModel,
     EntryProposal,
+    LiquidationModel,
     MarginMode,
     MarketSnapshot,
     MarketType,
@@ -53,6 +54,7 @@ def perp_terms() -> PerpetualTerms:
         exchange_leverage=Decimal(2),
         maintenance_margin_rate=Decimal("0.004"),
         maintenance_amount=Decimal(0),
+        liquidation_model=LiquidationModel.BINANCE_USDM_ISOLATED,
     )
 
 

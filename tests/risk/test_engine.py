@@ -13,6 +13,7 @@ from trading.risk import (
     AccountState,
     CostModel,
     EntryProposal,
+    LiquidationModel,
     MarginMode,
     MarketSnapshot,
     MarketType,
@@ -181,6 +182,7 @@ def test_liquidation_distance_exact_limit(
         exchange_leverage=Decimal(10),
         maintenance_margin_rate=Decimal(0),
         maintenance_amount=Decimal(maintenance_amount),
+        liquidation_model=LiquidationModel.BINANCE_USDM_ISOLATED,
     )
     proposal = replace(_sol(long_btc, "100", "95", "1.5"), perpetual=terms)
     decision = _evaluate(proposal, account, replace(market, symbol="SOLUSDT"), limits)
@@ -509,7 +511,13 @@ def _proposal(asset: str, side: Side, entry: Decimal, stop: Decimal, qty: Decima
         entry_price=entry,
         stop_price=stop,
         quantity=qty,
-        perpetual=PerpetualTerms(MarginMode.ISOLATED, Decimal(1), Decimal("0.004"), Decimal(0)),
+        perpetual=PerpetualTerms(
+            MarginMode.ISOLATED,
+            Decimal(1),
+            Decimal("0.004"),
+            Decimal(0),
+            LiquidationModel.BINANCE_USDM_ISOLATED,
+        ),
     )
 
 
@@ -625,3 +633,107 @@ def test_result_does_not_depend_on_the_process_decimal_context(
     with localcontext(Context(prec=4)):
         decision = _evaluate(proposal, account, sol_market, limits)
     assert decision.reasons == {V.RISK_PER_TRADE}
+
+
+# --- motor v1: nocional mínimo, modelo de liquidación y cifras de cada veto --------------------
+
+
+@pytest.mark.parametrize(
+    ("min_notional", "vetoed"), [("374.99", False), ("375", False), ("375.01", True)]
+)
+def test_min_notional_exact_limit(
+    long_btc: EntryProposal,
+    account: AccountState,
+    market: MarketSnapshot,
+    limits: RiskLimits,
+    min_notional: str,
+    vetoed: bool,
+) -> None:
+    # Nocional de la propuesta: 0.00625 x 60,000 = USD 375.
+    proposal = replace(long_btc, min_notional=Decimal(min_notional))
+    decision = _evaluate(proposal, account, market, limits)
+    assert (V.BELOW_MIN_NOTIONAL in decision.reasons) is vetoed
+    if vetoed:
+        (veto,) = decision.vetoes
+        assert (veto.observed, veto.limit, veto.subject) == (
+            Decimal("375.00000"),
+            Decimal("375.01"),
+            "BTCUSDT",
+        )
+
+
+def test_min_notional_is_not_checked_on_non_positive_quantity(
+    long_btc: EntryProposal, account: AccountState, market: MarketSnapshot, limits: RiskLimits
+) -> None:
+    proposal = replace(long_btc, quantity=Decimal(0), min_notional=Decimal(100))
+    assert _evaluate(proposal, account, market, limits).reasons == {V.NON_POSITIVE_QUANTITY}
+
+
+def test_hyperliquid_liquidation_model_is_vetoed_until_implemented(
+    long_btc: EntryProposal, account: AccountState, market: MarketSnapshot, limits: RiskLimits
+) -> None:
+    assert long_btc.perpetual is not None
+    terms = replace(long_btc.perpetual, liquidation_model=LiquidationModel.HYPERLIQUID_ISOLATED)
+    decision = _evaluate(replace(long_btc, perpetual=terms), account, market, limits)
+    assert decision.reasons == {V.LIQUIDATION_MODEL_UNAVAILABLE}
+    assert decision.liquidation_price is None
+    assert decision.vetoes[0].subject == "HYPERLIQUID_ISOLATED"
+
+
+def test_vetoes_carry_observed_value_and_limit(
+    long_btc: EntryProposal, account: AccountState, market: MarketSnapshot, limits: RiskLimits
+) -> None:
+    # 1.2135 x USD 7.50 de riesgo = USD 9.10125 frente a USD 7.50 por operación.
+    proposal = replace(long_btc, quantity=Decimal("0.00758437500"))
+    decision = _evaluate(proposal, account, market, limits)
+    risk_veto = next(v for v in decision.vetoes if v.reason is V.RISK_PER_TRADE)
+    assert risk_veto.observed == Decimal("9.10125")
+    assert risk_veto.limit == Decimal("7.500")
+
+
+def test_data_vetoes_report_seconds(
+    long_btc: EntryProposal, account: AccountState, market: MarketSnapshot, limits: RiskLimits
+) -> None:
+    stale = replace(
+        market,
+        price_time=NOW - timedelta(seconds=90),
+        last_bar_close_time=NOW - timedelta(hours=4, seconds=301),
+    )
+    decision = _evaluate(long_btc, account, stale, limits)
+    by_reason = {v.reason: v for v in decision.vetoes}
+    assert (by_reason[V.STALE_PRICE].observed, by_reason[V.STALE_PRICE].limit) == (
+        Decimal(90),
+        Decimal(60),
+    )
+    assert (by_reason[V.STALE_BARS].observed, by_reason[V.STALE_BARS].limit) == (
+        Decimal(14701),
+        Decimal(14700),
+    )
+    future = replace(market, price_time=NOW + timedelta(seconds=6))
+    veto = _evaluate(long_btc, account, future, limits).vetoes[0]
+    assert (veto.reason, veto.observed, veto.limit) == (V.FUTURE_TIMESTAMP, Decimal(6), Decimal(5))
+
+
+def test_liquidation_veto_reports_buffer_as_multiple_of_stop_distance(
+    long_btc: EntryProposal, account: AccountState, market: MarketSnapshot, limits: RiskLimits
+) -> None:
+    assert long_btc.perpetual is not None
+    terms = replace(long_btc.perpetual, exchange_leverage=Decimal(20))
+    decision = _evaluate(replace(long_btc, perpetual=terms), account, market, limits)
+    veto = next(v for v in decision.vetoes if v.reason is V.LIQUIDATION_TOO_CLOSE)
+    assert veto.observed is not None
+    assert veto.observed < 3
+    assert veto.limit == 3
+
+
+def test_drawdown_veto_reports_drawdown_and_threshold(
+    long_btc: EntryProposal, market: MarketSnapshot, limits: RiskLimits
+) -> None:
+    account = AccountState(Decimal(1200), Decimal(1500), Decimal(1200), Decimal(1200))
+    status = assess_account(account, limits)
+    (veto,) = status.vetoes
+    assert (veto.reason, veto.observed, veto.limit) == (
+        V.DRAWDOWN_HARD_STOP,
+        Decimal("0.2"),
+        Decimal("0.20"),
+    )

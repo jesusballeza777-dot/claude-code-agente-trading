@@ -5,6 +5,8 @@
 - **Decide:** propietario del proyecto
 - **Fuentes:** plan maestro v2 §1 (#2, #4), §2, §3, §8
 
+> **Nota del 23-oct-2026:** el umbral de funding del punto 6 se propone en el ADR-013 (0.10% cada 8 h en contra; estado Propuesto). Hasta su aprobación, el punto 6 sigue PENDIENTE como límite aprobado.
+
 ## Contexto
 
 - En v1 el mercado era spot 1×, solo en largo **[confirmado, plan §2]**.

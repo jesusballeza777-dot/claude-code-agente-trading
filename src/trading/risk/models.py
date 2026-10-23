@@ -54,6 +54,18 @@ class MarginMode(StrEnum):
     CROSS = "CROSS"
 
 
+class LiquidationModel(StrEnum):
+    """Fórmula de liquidación de la plataforma (auditoría A-08).
+
+    Cada plataforma calcula la liquidación a su manera. El motor solo implementa la de Binance
+    USDⓈ-M en margen aislado; con cualquier otra veta la entrada (fallo cerrado) hasta que su
+    fórmula esté implementada y verificada.
+    """
+
+    BINANCE_USDM_ISOLATED = "BINANCE_USDM_ISOLATED"
+    HYPERLIQUID_ISOLATED = "HYPERLIQUID_ISOLATED"
+
+
 @dataclass(frozen=True, slots=True)
 class CostModel:
     """Costes estimados por lado, como fracción.
@@ -80,12 +92,14 @@ class PerpetualTerms:
     (nocional / apalancamiento) y por tanto el precio de liquidación. No es el apalancamiento
     efectivo de la cuenta, que limita el motor. `maintenance_margin_rate` y `maintenance_amount`
     son los del tramo de margen del contrato para el nocional de la posición.
+    `liquidation_model` es obligatorio: la fórmula depende de la plataforma.
     """
 
     margin_mode: MarginMode
     exchange_leverage: Decimal
     maintenance_margin_rate: Decimal
     maintenance_amount: Decimal
+    liquidation_model: LiquidationModel
 
     def __post_init__(self) -> None:
         if require_decimal("exchange_leverage", self.exchange_leverage) < 1:
@@ -95,11 +109,17 @@ class PerpetualTerms:
             raise ValueError("maintenance_margin_rate debe estar en [0, 1)")
         if require_decimal("maintenance_amount", self.maintenance_amount) < 0:
             raise ValueError("maintenance_amount no puede ser negativo")
+        if not isinstance(self.liquidation_model, LiquidationModel):
+            raise TypeError("liquidation_model debe ser un LiquidationModel")
 
 
 @dataclass(frozen=True, slots=True)
 class EntryProposal:
-    """Propuesta de entrada que el motor aprueba o veta."""
+    """Propuesta de entrada que el motor aprueba o veta.
+
+    `min_notional` es el nocional mínimo de orden del contrato (protocolo C-19). Por debajo, el
+    motor veta: nunca se aumenta el tamaño para alcanzarlo.
+    """
 
     strategy_id: str
     symbol: str
@@ -110,6 +130,7 @@ class EntryProposal:
     stop_price: Decimal
     quantity: Decimal
     perpetual: PerpetualTerms | None = None
+    min_notional: Decimal = Decimal(0)
 
     def __post_init__(self) -> None:
         for name in ("strategy_id", "symbol", "base_asset"):
@@ -117,6 +138,7 @@ class EntryProposal:
         require_positive("entry_price", self.entry_price)
         require_positive("stop_price", self.stop_price)
         require_decimal("quantity", self.quantity)
+        require_non_negative("min_notional", self.min_notional)
         if self.market is MarketType.PERPETUAL and self.perpetual is None:
             raise ValueError("una entrada en perpetuo necesita PerpetualTerms")
         if self.market is MarketType.SPOT and self.perpetual is not None:

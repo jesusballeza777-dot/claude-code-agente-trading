@@ -10,12 +10,17 @@ Convención de límites exactos (ADR-007):
 - Distancia a liquidación: exactamente `ratio x distancia al stop` está permitido.
 - Drawdown: alcanzar exactamente el umbral activa la parada.
 - Datos: una edad exactamente igual al máximo está permitida.
+- Nocional mínimo: exactamente el mínimo está permitido.
+
+Cada veto lleva un código estable (`VetoReason`), un detalle técnico y, cuando aplica, la cifra
+observada y el límite, que `trading.risk.explain` convierte en un mensaje en español.
+Las reglas ampliadas de ADR-013 (Propuesto) están en `trading.risk.extended`.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
 
@@ -25,6 +30,7 @@ from trading.risk.models import (
     AccountState,
     CostModel,
     EntryProposal,
+    LiquidationModel,
     MarginMode,
     MarketSnapshot,
     MarketType,
@@ -55,12 +61,38 @@ class VetoReason(StrEnum):
     DAILY_LOSS = "DAILY_LOSS"
     WEEKLY_LOSS = "WEEKLY_LOSS"
     CORRELATED_EXPOSURE = "CORRELATED_EXPOSURE"
+    BELOW_MIN_NOTIONAL = "BELOW_MIN_NOTIONAL"
+    LIQUIDATION_MODEL_UNAVAILABLE = "LIQUIDATION_MODEL_UNAVAILABLE"
+    # Reglas ampliadas (ADR-013, Propuesto): trading.risk.extended
+    BETA_EXPOSURE = "BETA_EXPOSURE"
+    ALT_NOTIONAL = "ALT_NOTIONAL"
+    ALTS_TOTAL_NOTIONAL = "ALTS_TOTAL_NOTIONAL"
+    MAX_OPEN_POSITIONS = "MAX_OPEN_POSITIONS"
+    STABLECOIN_DEPEG = "STABLECOIN_DEPEG"
+    MACRO_EVENT_WINDOW = "MACRO_EVENT_WINDOW"
+    VOLATILITY_CIRCUIT = "VOLATILITY_CIRCUIT"
+    API_ERROR_CIRCUIT = "API_ERROR_CIRCUIT"
+    SPREAD_TOO_WIDE = "SPREAD_TOO_WIDE"
+    BOOK_TOO_THIN = "BOOK_TOO_THIN"
+    ADVERSE_FUNDING = "ADVERSE_FUNDING"
+    MISSING_CONDITION = "MISSING_CONDITION"
 
 
 @dataclass(frozen=True, slots=True)
 class Veto:
+    """Un motivo de veto.
+
+    `reason` es el código estable que usan la auditoría y la app; `detail` es el texto técnico.
+    `observed` y `limit` son la cifra que incumple y su límite, en la unidad propia del motivo
+    (USD, fracción, múltiplo, segundos o conteo; ver `trading.risk.explain`). `subject` nombra
+    el activo, la estrategia o el dato afectado, si aplica.
+    """
+
     reason: VetoReason
     detail: str
+    observed: Decimal | None = None
+    limit: Decimal | None = None
+    subject: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,6 +117,7 @@ class RiskDecision:
     trade_risk: Decimal | None
     effective_leverage_after: Decimal | None
     liquidation_price: Decimal | None
+    close_orderly: bool = False
 
     @property
     def approved(self) -> bool:
@@ -102,7 +135,9 @@ def assess_account(account: AccountState, limits: RiskLimits) -> AccountStatus:
     if account.trading_halted:
         vetoes.append(Veto(VetoReason.TRADING_HALTED, "sistema detenido (parada manual o latch)"))
     if account.equity <= 0:
-        vetoes.append(Veto(VetoReason.NON_POSITIVE_EQUITY, f"capital={account.equity}"))
+        vetoes.append(
+            Veto(VetoReason.NON_POSITIVE_EQUITY, f"capital={account.equity}", account.equity)
+        )
         return AccountStatus(drawdown=None, vetoes=tuple(vetoes), flatten_positions=True)
 
     # Drawdown desde el máximo histórico del capital (ADR-007); el máximo incluye el capital actual.
@@ -116,6 +151,8 @@ def assess_account(account: AccountState, limits: RiskLimits) -> AccountStatus:
             Veto(
                 VetoReason.DRAWDOWN_HARD_STOP,
                 f"drawdown={drawdown:.4%} >= corte duro {limits.drawdown_hard_stop:.2%}",
+                drawdown,
+                limits.drawdown_hard_stop,
             )
         )
     elif loss_from_peak >= limits.drawdown_halt * peak:
@@ -123,6 +160,8 @@ def assess_account(account: AccountState, limits: RiskLimits) -> AccountStatus:
             Veto(
                 VetoReason.DRAWDOWN_HALT,
                 f"drawdown={drawdown:.4%} >= parada {limits.drawdown_halt:.2%}",
+                drawdown,
+                limits.drawdown_halt,
             )
         )
     return AccountStatus(drawdown=drawdown, vetoes=tuple(vetoes), flatten_positions=flatten)
@@ -186,32 +225,65 @@ def _freshness_vetoes(
             Veto(
                 VetoReason.MARKET_DATA_MISMATCH,
                 f"datos de {market.symbol} para una propuesta de {proposal.symbol}",
+                subject=proposal.symbol,
             )
         )
-    latest_allowed = now + limits.max_clock_skew
-    if market.price_time > latest_allowed or market.last_bar_close_time > latest_allowed:
-        vetoes.append(Veto(VetoReason.FUTURE_TIMESTAMP, "marca de tiempo de datos en el futuro"))
+    ahead = max(market.price_time, market.last_bar_close_time) - now
+    if ahead > limits.max_clock_skew:
+        vetoes.append(
+            Veto(
+                VetoReason.FUTURE_TIMESTAMP,
+                f"marca de tiempo de datos {ahead} en el futuro > {limits.max_clock_skew}",
+                seconds(ahead),
+                seconds(limits.max_clock_skew),
+            )
+        )
     price_age = now - market.price_time
     if price_age > limits.max_price_age:
         vetoes.append(
-            Veto(VetoReason.STALE_PRICE, f"precio con {price_age} > {limits.max_price_age}")
+            Veto(
+                VetoReason.STALE_PRICE,
+                f"precio con {price_age} > {limits.max_price_age}",
+                seconds(price_age),
+                seconds(limits.max_price_age),
+                subject=market.symbol,
+            )
         )
     bar_age = now - market.last_bar_close_time
-    if bar_age > market.bar_interval + limits.max_bar_lag:
+    max_bar_age = market.bar_interval + limits.max_bar_lag
+    if bar_age > max_bar_age:
         vetoes.append(
             Veto(
                 VetoReason.STALE_BARS,
                 f"última vela cerrada hace {bar_age} > {market.bar_interval} + "
                 f"{limits.max_bar_lag}",
+                seconds(bar_age),
+                seconds(max_bar_age),
             )
         )
     return vetoes
+
+
+def seconds(duration: timedelta) -> Decimal:
+    """Duración en segundos como Decimal exacto (sin pasar por float)."""
+    return Decimal(duration // timedelta(microseconds=1)).scaleb(-6)
 
 
 def _structure_vetoes(proposal: EntryProposal, limits: RiskLimits) -> list[Veto]:
     vetoes: list[Veto] = []
     if proposal.quantity <= 0:
         vetoes.append(Veto(VetoReason.NON_POSITIVE_QUANTITY, f"cantidad={proposal.quantity}"))
+    elif proposal.notional < proposal.min_notional:
+        vetoes.append(
+            Veto(
+                VetoReason.BELOW_MIN_NOTIONAL,
+                f"nocional {proposal.notional} < mínimo del contrato {proposal.min_notional} "
+                "(protocolo C-19: nunca se aumenta el tamaño)",
+                proposal.notional,
+                proposal.min_notional,
+                subject=proposal.symbol,
+            )
+        )
     if proposal.side is Side.SHORT:
         if proposal.market is MarketType.SPOT:
             vetoes.append(Veto(VetoReason.SHORT_ON_SPOT, "no hay cortos en spot (ADR-001)"))
@@ -220,6 +292,7 @@ def _structure_vetoes(proposal: EntryProposal, limits: RiskLimits) -> list[Veto]
                 Veto(
                     VetoReason.SHORT_NOT_VALIDATED,
                     f"estrategia {proposal.strategy_id!r} sin cortos validados (plan §3)",
+                    subject=proposal.strategy_id,
                 )
             )
     if proposal.perpetual is not None and proposal.perpetual.margin_mode is MarginMode.CROSS:
@@ -245,7 +318,12 @@ def _budget_vetoes(
     budget = account.equity * limits.risk_per_trade
     if risk > budget:
         vetoes.append(
-            Veto(VetoReason.RISK_PER_TRADE, f"riesgo {risk} > presupuesto por operación {budget}")
+            Veto(
+                VetoReason.RISK_PER_TRADE,
+                f"riesgo {risk} > presupuesto por operación {budget}",
+                risk,
+                budget,
+            )
         )
 
     if total_notional > limits.max_effective_leverage * account.equity:
@@ -253,6 +331,8 @@ def _budget_vetoes(
             Veto(
                 VetoReason.EFFECTIVE_LEVERAGE,
                 f"apalancamiento efectivo {leverage_after:.4f}x > {limits.max_effective_leverage}x",
+                leverage_after,
+                limits.max_effective_leverage,
             )
         )
 
@@ -264,11 +344,14 @@ def _budget_vetoes(
         (VetoReason.WEEKLY_LOSS, account.week_start_equity, limits.max_weekly_loss),
     ):
         worst_case_loss = start - worst_case_equity
-        if worst_case_loss > limit * start:
+        allowed_loss = limit * start
+        if worst_case_loss > allowed_loss:
             vetoes.append(
                 Veto(
                     reason,
                     f"pérdida posible del periodo {worst_case_loss} > {limit:.2%} de {start}",
+                    worst_case_loss,
+                    allowed_loss,
                 )
             )
 
@@ -283,6 +366,9 @@ def _budget_vetoes(
                 Veto(
                     VetoReason.CORRELATED_EXPOSURE,
                     f"riesgo conjunto de {sorted(group)} {group_risk} > presupuesto {budget}",
+                    group_risk,
+                    budget,
+                    subject=" y ".join(sorted(group)),
                 )
             )
     return vetoes
@@ -294,6 +380,14 @@ def _liquidation_vetoes(
     terms = proposal.perpetual
     if terms is None:
         return [], None
+    if terms.liquidation_model is not LiquidationModel.BINANCE_USDM_ISOLATED:
+        return [
+            Veto(
+                VetoReason.LIQUIDATION_MODEL_UNAVAILABLE,
+                f"sin fórmula de liquidación implementada para {terms.liquidation_model}",
+                subject=terms.liquidation_model.value,
+            )
+        ], None
     isolated_margin = proposal.notional / terms.exchange_leverage
     price = isolated_liquidation_price(
         side=proposal.side,
@@ -307,15 +401,16 @@ def _liquidation_vetoes(
         return [], None
     # Comparación sin dividir: |entrada - liquidación| >= ratio x |entrada - stop|.
     buffer_in_price = adverse_distance(proposal.side, proposal.entry_price, price)
-    required = limits.min_liquidation_to_stop_ratio * abs(
-        proposal.entry_price - proposal.stop_price
-    )
+    stop_distance = abs(proposal.entry_price - proposal.stop_price)
+    required = limits.min_liquidation_to_stop_ratio * stop_distance
     if buffer_in_price < required:
         return [
             Veto(
                 VetoReason.LIQUIDATION_TOO_CLOSE,
                 f"liquidación estimada en {price}: colchón {buffer_in_price} < "
                 f"{limits.min_liquidation_to_stop_ratio} x distancia al stop",
+                buffer_in_price / stop_distance,
+                limits.min_liquidation_to_stop_ratio,
             )
         ], price
     return [], price

@@ -1,0 +1,34 @@
+# Reglas ampliadas del motor de riesgo (ADR-013, estado PROPUESTO).
+# Solo añaden restricciones a los límites F7-F8; ninguna relaja un límite existente.
+# Mientras el propietario no apruebe el ADR-013 se aplican en simulación y en sombra
+# (y como sensibilidad en los backtests), no como límites aprobados.
+# Fracciones sobre el capital a mercado: 0.10 = 10%.
+
+[exposure]
+max_beta_adjusted_exposure = 1.00      # suma de |nocional| x |beta frente a BTC| <= 100% del capital
+max_notional_per_alt = 0.10            # nocional en una sola alt <= 10% del capital
+max_notional_all_alts = 0.25           # nocional sumado de todas las alts <= 25% del capital
+max_open_positions = 4                 # 4 x 0.5% de riesgo = 2%, el límite de pérdida diaria
+core_assets = ["BTC", "ETH"]           # todo lo demás cuenta como alt
+
+[stablecoins]
+monitored = ["USDT", "USDC"]           # sin precio de alguna: veto (fallo cerrado)
+max_deviation = 0.005                  # |precio en USD - 1| > 0.5%: veto y cierre ordenado
+
+[macro]
+blackout_minutes = 120                 # sin entradas desde 2 h antes hasta 2 h después de FOMC, CPI y NFP
+
+[circuit_breakers]
+max_api_errors = 3                     # 3 errores de la API en la ventana: sin entradas (se cablea en la F6)
+api_error_window_minutes = 10
+# La volatilidad de 1h por encima de su p99 no tiene parámetro: el p99 llega como dato.
+
+[liquidity]
+max_spread_bps_core = 5                # medio spread <= la mitad del slippage del protocolo (0.05%)
+max_spread_bps_alt = 10                # ídem con el slippage de alts (0.10%)
+depth_band_bps_core = 5                # banda en la que se mide la profundidad del lado que se consume
+depth_band_bps_alt = 10
+min_depth_multiple = 10                # profundidad en la banda >= 10 x nocional de la orden
+
+[funding]
+max_adverse_funding_8h = 0.0010        # 0.10% cada 8 h en contra, 10 veces el funding base de 0.01%
