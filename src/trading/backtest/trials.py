@@ -135,7 +135,7 @@ class TrialRegistry:
         results_dir.mkdir(parents=True, exist_ok=True)
         result_path = results_dir / f"{trial_id}.json"
         payload = {"trial_id": trial_id, **result}
-        result_path.write_text(json.dumps(payload, indent=1, default=str), encoding="utf-8")
+        result_path.write_text(json.dumps(payload, indent=1, default=str) + "\n", encoding="utf-8")
         reference = (
             str(result_path.relative_to(REPO_ROOT))
             if result_path.is_relative_to(REPO_ROOT)

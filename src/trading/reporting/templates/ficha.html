@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block contenido %}
+<p>{{ titulo }} · corrida principal <strong>{{ trial_id }}</strong> · parámetros {{ parametros }}</p>
+<div class="kpis">
+  <div class="kpi"><div class="e">Operaciones</div><div class="v">{{ resumen.operaciones }}</div></div>
+  <div class="kpi"><div class="e">Esperanza neta</div><div class="v">{{ "%+.3f"|format(resumen.esperanza_r) }} R</div></div>
+  <div class="kpi"><div class="e">IC90%</div><div class="v">[{{ "%+.2f"|format(resumen.ic90_r[0]) }}, {{ "%+.2f"|format(resumen.ic90_r[1]) }}]</div></div>
+  <div class="kpi"><div class="e">Intentos (N del DSR)</div><div class="v">{{ intentos }}</div></div>
+</div>
+<h2>Curva de capital neta (USD 1,500 iniciales)</h2>
+{{ curva_svg|safe }}
+<h2>Gate de la F4 (sin holdout)</h2>
+<table><tr><th>Criterio</th><th>Resultado</th></tr>
+{% for nombre, ok in criterios %}<tr><td>{{ nombre }}</td><td class="{{ 'ok' if ok else 'no' }}">{{ "sí" if ok else "no" }}</td></tr>{% endfor %}
+</table>
+<table><tr><th>Medida</th><th class="num">Valor</th></tr>
+{% for nombre, valor in valores %}<tr><td>{{ nombre }}</td><td class="num">{{ valor }}</td></tr>{% endfor %}
+</table>
+<h2>Por régimen y dirección</h2>
+<table><tr><th>Grupo</th><th class="num">Operaciones</th><th class="num">Esperanza (R)</th></tr>
+{% for nombre, v in grupos %}<tr><td>{{ nombre }}</td><td class="num">{{ v.n }}</td><td class="num">{{ "%+.3f"|format(v.esperanza_r) }}</td></tr>{% endfor %}
+</table>
+<h2>Pre-registro</h2>
+<p>Reglas congeladas en el commit <code>{{ prereg }}</code>. El holdout (2025-01-01 → hoy) sigue sellado: el criterio 9 se evalúa una sola vez.</p>
+{% endblock %}

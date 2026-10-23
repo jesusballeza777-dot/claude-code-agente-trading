@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="parte">{{ parte }}</div>
+<h2>Cuenta</h2>
+<div class="kpis">
+  <div class="kpi"><div class="e">Capital</div><div class="v">USD {{ cuenta.capital }}</div></div>
+  <div class="kpi"><div class="e">Drawdown</div><div class="v">{{ "%.2f"|format(cuenta.drawdown * 100) }}%</div></div>
+  <div class="kpi"><div class="e">Pérdida diaria usada</div><div class="v">{{ "%.1f"|format(cuenta.presupuesto.diario.usado * 100) }}% de {{ "%.0f"|format(cuenta.presupuesto.diario.limite * 100) }}%</div></div>
+  <div class="kpi"><div class="e">Pérdida semanal usada</div><div class="v">{{ "%.1f"|format(cuenta.presupuesto.semanal.usado * 100) }}% de {{ "%.0f"|format(cuenta.presupuesto.semanal.limite * 100) }}%</div></div>
+</div>
+{{ curva_svg|safe }}
+<h2>Decisiones y abstenciones</h2>
+<table><tr><th>Fecha (UTC)</th><th>Acción</th><th>Nivel</th><th>Veto</th><th>Motivo</th></tr>
+{% for d in decisiones %}<tr><td>{{ d.t[:16] }}</td><td>{{ d.accion }}</td><td>{{ d.nivel }}</td><td>{{ d.veto or "—" }}</td><td>{{ d.motivo }}</td></tr>{% endfor %}
+</table>
+<h2>Vetos del motor de riesgo</h2>
+<table><tr><th>Código</th><th>Qué significa</th><th class="num">Veces</th></tr>
+{% for v in vetos %}<tr><td>{{ v.codigo }}</td><td>{{ v.explicacion }}</td><td class="num">{{ v.veces }}</td></tr>{% endfor %}
+</table>
+<h2>Incidentes</h2>
+<p>{{ incidentes }}</p>
+<h2>Próximos pasos</h2>
+<ul>{% for p in pasos %}<li>{{ p.tarea }}</li>{% endfor %}</ul>
+{% endblock %}

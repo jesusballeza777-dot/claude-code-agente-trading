@@ -20,4 +20,6 @@ Un ADR solo pasa a **Aceptado** con la aprobación explícita del propietario. L
 | [012](012-estado-de-fases-y-arranque-de-f3.md) | Estado de fases y arranque de la F3 con datos públicos | Aceptado |
 | [013](013-motor-de-riesgo-v1-reglas-ampliadas.md) | Motor de riesgo v1: reglas ampliadas (exposición, alts, depeg, macro, disyuntores, liquidez, funding) | **Propuesto** |
 | [014](014-centro-de-mando-web.md) | Centro de Mando web como app principal; Android como cliente ligero | Aceptado |
+| [015](015-seguridad-del-centro-de-mando.md) | Seguridad del Centro de Mando | Aceptado |
 | [016](016-datos-publicos-y-almacenamiento.md) | Datos públicos de la F3 y almacenamiento (Parquet + TimescaleDB) | Aceptado |
+| [017](017-reportes-descargables.md) | Reportes descargables (PDF, XLSX, CSV, JSON y Parquet) | Aceptado |

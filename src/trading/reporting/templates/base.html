@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<title>{{ meta.title }}</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 20mm 16mm;
+    @bottom-left { content: "{{ meta.disclaimer }}"; font-size: 8pt; color: #5b6b70; }
+    @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 8pt; color: #5b6b70; } }
+  :root { --petroleo: #0b2a33; --acento: #0f9d8a; --ambar: #b45309; --tinta: #14232a; --suave: #5b6b70; --linea: #d7e2e4; }
+  body { font-family: "DejaVu Sans", "Liberation Sans", sans-serif; color: var(--tinta); font-size: 10pt; line-height: 1.45; }
+  header.cabecera { border-bottom: 3px solid var(--acento); padding-bottom: 6pt; margin-bottom: 12pt; }
+  header.cabecera .marca { color: var(--acento); font-weight: bold; letter-spacing: 0.08em; font-size: 8.5pt; text-transform: uppercase; }
+  h1 { color: var(--petroleo); font-size: 19pt; margin: 2pt 0 0; }
+  h2 { color: var(--petroleo); font-size: 12.5pt; margin: 16pt 0 6pt; border-left: 4px solid var(--acento); padding-left: 6pt; }
+  .demo { border: 2px solid var(--ambar); color: var(--ambar); font-weight: bold; padding: 6pt 8pt; margin: 8pt 0; text-align: center; letter-spacing: 0.05em; }
+  .marca-agua { position: fixed; top: 42%; left: 8%; transform: rotate(-30deg); font-size: 54pt; color: rgba(180, 83, 9, 0.10); font-weight: bold; z-index: -1; }
+  table { width: 100%; border-collapse: collapse; margin: 4pt 0 8pt; font-variant-numeric: tabular-nums; }
+  th { background: var(--petroleo); color: #fff; text-align: left; padding: 4pt 6pt; font-size: 8.5pt; }
+  td { border-bottom: 1px solid var(--linea); padding: 3.5pt 6pt; font-size: 8.5pt; }
+  td.num { text-align: right; }
+  .ok { color: #0f766e; font-weight: bold; }
+  .no { color: #b91c1c; font-weight: bold; }
+  .kpis { display: flex; gap: 8pt; margin: 6pt 0 4pt; }
+  .kpi { flex: 1; border: 1px solid var(--linea); border-top: 3px solid var(--acento); padding: 6pt; }
+  .kpi .v { font-size: 14pt; font-weight: bold; color: var(--petroleo); }
+  .kpi .e { font-size: 7.5pt; color: var(--suave); text-transform: uppercase; letter-spacing: 0.06em; }
+  .parte { background: #eef7f6; border-left: 4px solid var(--acento); padding: 8pt 10pt; }
+  .procedencia td { font-size: 7.5pt; color: var(--suave); }
+  .nota { color: var(--suave); font-size: 8pt; }
+</style>
+</head>
+<body>
+{% if meta.demo %}<div class="marca-agua">DEMOSTRACIÓN</div>{% endif %}
+<header class="cabecera">
+  <div class="marca">Centro de Mando · Brújula</div>
+  <h1>{{ meta.title }}</h1>
+</header>
+{% if meta.demo %}<div class="demo">DATOS DE DEMOSTRACIÓN: no son operaciones reales</div>{% endif %}
+{% block contenido %}{% endblock %}
+<h2>Procedencia</h2>
+<table class="procedencia">
+{% for label, value in meta_lines %}<tr><td>{{ label }}</td><td>{{ value }}</td></tr>{% endfor %}
+</table>
+</body>
+</html>

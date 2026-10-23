@@ -1,0 +1,17 @@
+{% extends "semanal.html" %}
+{% block contenido %}
+{{ super() }}
+<h2>Desempeño por hipótesis (backtest 2020-2024, sin holdout)</h2>
+<table><tr><th>Hipótesis</th><th class="num">Operaciones</th><th class="num">Esperanza (R)</th><th class="num">IC90% (R)</th><th class="num">PF</th><th>Gate 1-8</th></tr>
+{% for h in hipotesis %}<tr><td>{{ h.id }}</td><td class="num">{{ h.n }}</td><td class="num">{{ "%+.3f"|format(h.esperanza) }}</td><td class="num">[{{ "%+.3f"|format(h.ic[0]) }}, {{ "%+.3f"|format(h.ic[1]) }}]</td><td class="num">{{ h.pf }}</td><td class="{{ 'ok' if h.pasa else 'no' }}">{{ "pasa" if h.pasa else "no pasa" }}</td></tr>{% endfor %}
+</table>
+<p class="nota">Desviación frente al backtest: se medirá con la simulación en sombra (F7).</p>
+<h2>Costes del proyecto</h2>
+<table><tr><th>Concepto</th><th class="num">USD/mes</th><th>Estado</th></tr>
+{% for c in costes %}<tr><td>{{ c.concepto }}</td><td class="num">{{ c.usd_mes }}</td><td>{{ c.estado }}</td></tr>{% endfor %}
+</table>
+<h2>Avance del roadmap</h2>
+<table><tr><th>Fase</th><th>Nombre</th><th>Estado</th></tr>
+{% for f in fases %}<tr><td>{{ f.id }}</td><td>{{ f.nombre }}</td><td>{{ f.estado }}</td></tr>{% endfor %}
+</table>
+{% endblock %}
