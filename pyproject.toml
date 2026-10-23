@@ -1,11 +1,15 @@
 [project]
 name = "agente-trading"
 version = "0.0.1"
-description = "Agente de trading cripto con Claude (F0 + cimientos de F2). Sin conexión a exchanges."
+description = "Agente de trading cripto con Claude. Solo datos públicos; sin claves ni conexión de cuenta a exchanges."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-# Sin dependencias de runtime: el motor de riesgo es código puro con la biblioteca estándar.
-dependencies = []
+# El motor de riesgo sigue siendo código puro (biblioteca estándar). Dependencias de la capa de
+# datos (F3, ADR-016): polars para Parquet y psycopg para TimescaleDB.
+dependencies = [
+    "polars>=2.0",
+    "psycopg[binary]>=3.3",
+]
 
 [dependency-groups]
 dev = [
@@ -62,8 +66,11 @@ select = [
     "RUF",      # reglas propias de ruff
 ]
 
+# Signos matemáticos de los textos en español (fórmulas en docstrings e informes).
+allowed-confusables = ["−", "×"]
+
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101"]  # assert es el mecanismo de pytest
+"tests/**" = ["S101", "S311", "S603", "S607"]  # assert, azar con semilla, git y ssh-keygen
 
 # --- mypy -------------------------------------------------------------------------
 # Base razonable para todo el código; strict completo en risk/ y execution/ (CLAUDE.md).
