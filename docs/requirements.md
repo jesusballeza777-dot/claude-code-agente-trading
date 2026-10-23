@@ -24,7 +24,7 @@ con un capital de USD 1,500 en USDC **[confirmado, plan §1]**.
 
 | Área | Incluido | Fuente |
 |---|---|---|
-| Mercados | Binance spot + perpetuos USDⓈ-M, largos y cortos | plan §2, ADR-001 |
+| Mercados | Binance spot + perpetuos USDⓈ-M, largos y cortos; Hyperliquid (perpetuos) con wallet de agente sin retiros | plan §2, ADR-001, ADR-009 |
 | Activos | BTC, ETH y pocas alts líquidas | CLAUDE.md |
 | Horizonte | Velas de 4h y 1d | plan §5 (H1 diario, H2 4h), ADR-004 |
 | Hipótesis | H1-H4 pre-registradas antes de cualquier backtest | plan §5, CLAUDE.md regla 6 |
@@ -33,7 +33,9 @@ con un capital de USD 1,500 en USDC **[confirmado, plan §1]**.
 | Motor de riesgo | Código puro con veto absoluto y los límites del plan §3 | CLAUDE.md regla 4, plan §3 |
 | Ejecución | Aprobación por niveles A/B vía Telegram; stop STOP_MARKET reduce-only en el exchange desde la entrada | plan §3-4, ADR-006 |
 | Validación | Gate de la F4, shadow trading ≥12 semanas (F7), piloto real de 3 meses (F8) | plan §5, §7 |
-| Seguridad | Secretos con SOPS/age, gitleaks en pre-commit y CI, claves sin retiro y con IP whitelist | CLAUDE.md reglas 1 y 8, plan §3 |
+| Seguridad | Secretos con SOPS/age, gitleaks en pre-commit y CI, claves sin retiro y con IP whitelist; nunca la frase semilla ni la clave privada de MetaMask | CLAUDE.md reglas 1 y 8, plan §3, ADR-009 |
+| Control móvil | App Android: resumen, embudo de decisiones, rendimiento, aprendizaje por operación, controles, reportes fiscales y chat de solo lectura | ADR-010, `docs/app/especificacion.md` |
+| Autonomía | Crece por escalones según la evidencia; el motor de riesgo mantiene el veto | ADR-011 |
 
 ## 3. Fuera de alcance
 
@@ -46,7 +48,9 @@ con un capital de USD 1,500 en USDC **[confirmado, plan §1]**.
 - Conexión a exchanges antes de la F1/F3 **[confirmado, CLAUDE.md]**.
 - Más tamaño o apalancamiento en el nivel A que en el B (solo se revisa en la F9, con datos reales) **[confirmado, plan §4]**.
 - Asesoría fiscal: el tratamiento de los derivados se revisa con el contador antes de la F8 **[confirmado, plan §1]**.
-- Otros exchanges como plataforma principal (Kraken solo como contingencia; Bitso solo como rampa MXN) **[confirmado, ADR-002]**.
+- Otras plataformas fuera de Binance y Hyperliquid (Kraken solo como contingencia; Bitso solo como rampa MXN) **[confirmado, ADR-002, ADR-009]**.
+- Custodia de wallets: el sistema nunca guarda frases semilla ni claves privadas de MetaMask; los depósitos y retiros los hace el propietario a mano **[confirmado, ADR-009]**.
+- Activar `LIVE_TRADING` o cambiar límites de riesgo desde la app **[confirmado, ADR-010]**.
 
 ## 4. Supuestos
 

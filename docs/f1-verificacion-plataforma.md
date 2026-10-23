@@ -9,7 +9,7 @@ ni necesita credenciales para nada de esta lista.
 > contraseñas, códigos 2FA ni frases semilla (CLAUDE.md regla 1). Para esta fase basta con contar
 > el **resultado** de cada comprobación.
 
-**MetaMask no forma parte del proyecto:** no hay operaciones en cadena, ni puentes, ni DeFi. No hace falta conectarlo a nada.
+**MetaMask solo se usa para autorizar la wallet de agente de Hyperliquid** (ADR-009), desde tu propio dispositivo. El sistema nunca recibe tu frase semilla ni tu clave privada.
 
 ## 1. Binance (bloqueante para el apalancamiento, plan §8)
 
@@ -28,16 +28,28 @@ con IP whitelist de la IP fija del VPS, y se guardan cifradas con SOPS/age (ver 
 Si el punto 1 falla, la parte apalancada cambia de plataforma (ADR-002: Kraken como contingencia) o el alcance pasa a spot
 con un ADR nuevo.
 
-## 2. Claude: Max 5x o Pro + API (plan §8)
+## 2. Hyperliquid (ADR-009)
 
-- **Por verificar:** hasta donde sé, las suscripciones Pro y Max cubren claude.ai y Claude Code, pero **no incluyen créditos de la API**; la API se paga aparte, por consumo, en la consola de Anthropic. Si es así, el supuesto del plan §6 ("Max 5x con API cubierta por los créditos") no se cumple.
-- **Uso estimado de la API por el analista** (F5 en adelante): unas pocas llamadas al día, del orden de USD 5-15/mes con un modelo de gama Opus (**estimado**; se mide en la F5).
-- **Recomendación:** Max 5x para desarrollar con Claude Code a 20 h/semana (con Pro es fácil llegar a los límites de uso) **y** una cuenta de API con prepago pequeño para el analista. Presupuesto resultante: ≈USD 120-130/mes en lugar de 110-117.
-- Al decidir, se fija el identificador exacto del modelo en ADR-003 tras comprobarlo con `GET /v1/models`.
+| # | Comprobación | Dónde | Qué anotar |
+|---|---|---|---|
+| 1 | Que los términos de uso no restringen a residentes en México | app.hyperliquid.xyz → Terms (sección de personas restringidas) | Restringido sí/no |
+| 2 | Comisiones de tu nivel y mínimo de orden | Documentación de Hyperliquid → Fees / Trading | Maker, taker y mínimo de orden en USD |
+| 3 | Margen aislado disponible en BTC y ETH | Al abrir una orden, selector Cross / Isolated | Sí/no |
 
-## 3. Contador (antes de la F8)
+**No autorices todavía la wallet de agente.** Se hace en la F6, cuando el backend esté listo para guardarla cifrada.
+Al autorizarla: un nombre fijo (por ejemplo `trading-agente`), desde MetaMask en tu dispositivo, y anotar solo la **dirección pública** del agente.
 
-- Tratamiento fiscal de los derivados (perpetuos) frente al spot en México.
+## 3. Claude: cuenta de API para el analista (ADR-003)
+
+- **Decidido el 23-oct-2026:** Max 5x para desarrollar y una cuenta de API por consumo para el analista.
+- Crear la cuenta en la consola de Anthropic con un prepago pequeño y un límite de gasto mensual (por ejemplo, USD 30).
+- La clave de API **no** se comparte en el chat: se guarda cifrada con SOPS/age en la F5 (`ops/secrets.md`).
+- Con la cuenta creada se comprueba el identificador exacto del modelo con `GET /v1/models` y se fija en ADR-003.
+
+## 4. Contador (antes de la F8)
+
+- Tratamiento fiscal de los derivados (perpetuos) frente al spot en México, y de las operaciones en un exchange descentralizado (Hyperliquid).
+- Tipo de cambio para convertir a MXN (FIX de Banxico) y fecha de referencia (cierre de la operación en hora de CDMX); el reporte de la app los usa (ver `docs/app/especificacion.md`).
 - Documentación que necesita de cada operación (el registro de auditoría de la F6 se diseña con esa lista).
 
 ## Registro de resultados
@@ -50,4 +62,7 @@ con un ADR nuevo.
 | 1.4 | | |
 | 1.5 | | |
 | 1.6 | | |
-| 2 | | |
+| 2.1 | | |
+| 2.2 | | |
+| 2.3 | | |
+| 3 | | |

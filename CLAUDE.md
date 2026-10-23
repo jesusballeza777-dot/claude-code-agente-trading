@@ -1,6 +1,6 @@
 # CLAUDE.md: reglas permanentes del proyecto
 
-Proyecto: agente de trading cripto con Claude (BTC, ETH y pocas alts líquidas; Binance spot + perpetuos USDⓈ-M).
+Proyecto: agente de trading cripto con Claude (BTC, ETH y pocas alts líquidas; Binance spot + perpetuos USDⓈ-M y Hyperliquid con wallet de agente sin retiros, ADR-009; app Android de control, ADR-010).
 Documento rector: `docs/plan-maestro-v2.md`. Si algo aquí contradice al plan, avisa al propietario antes de actuar.
 
 ## Reglas que nunca se rompen
@@ -25,14 +25,15 @@ Documento rector: `docs/plan-maestro-v2.md`. Si algo aquí contradice al plan, a
 
 ## Stack
 
-Python 3.12 · uv con lockfile · pytest + hypothesis · ruff · mypy (strict en `risk/` y `execution/`) · PostgreSQL 16 + TimescaleDB · Parquet · Docker Compose · GitHub Actions · SOPS/age.
+Python 3.12 · uv con lockfile · pytest + hypothesis · ruff · mypy (strict en `risk/` y `execution/`) · PostgreSQL 16 + TimescaleDB · Parquet · Docker Compose · GitHub Actions · SOPS/age · App Android: Kotlin + Jetpack Compose (ADR-010).
 
 ## Estructura del repositorio
 
 ```
 docs/            plan-maestro-v2.md, requirements.md, risk_register.md, adr/
 research/        preregistration/, trials.csv, notebooks/ (sin datos crudos)
-src/trading/     data/, features/, signals/, risk/, decision/, execution/, audit/
+src/trading/     data/, features/, signals/, risk/, decision/, execution/, audit/, reporting/
 tests/           espejo de src/
 ops/             runbook.md, incidents/
+app/android/     app Android (Kotlin + Compose); se compila en CI
 ```

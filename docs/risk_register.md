@@ -36,6 +36,7 @@ El **disparador** es el hecho observable que activa la respuesta; la **respuesta
 | R21 | **Riesgo de contraparte o regulatorio** de Binance | Baja | Alto | Cuenta dedicada solo con el capital de trading; interfaz de ejecución propia para cambiar a la contingencia | Restricción regulatoria, congelación de retiros o caída prolongada | Detener operaciones; plan de contingencia |
 | R22 | **Tratamiento fiscal de derivados** distinto al spot | Media | Medio | Revisión con el contador antes de la F8 (plan §1 #7) | Llegada a la F8 sin revisión fiscal | No empezar la F8 |
 | R23 | **Caída del exchange o de la API** durante una posición abierta | Media | Medio | Stop reduce-only ya colocado en el exchange desde la entrada | Pérdida de conexión >N min con posición abierta (N por definir en F6) | Procedimiento del runbook (F6) |
+| R24 | **Riesgo propio de Hyperliquid**: contrato inteligente, puente, oráculo o restricción para México | Media | Alto | Wallet de agente sin retiros (ADR-009); solo el capital asignado a Hyperliquid está expuesto; verificación en F1; validación en sombra | Incidente de seguridad del protocolo, desanclaje del puente o restricción geográfica | Kill switch en Hyperliquid; el propietario retira a mano; ADR para continuar |
 
 ## Riesgos de IA y de seguridad
 
@@ -49,6 +50,8 @@ El **disparador** es el hecho observable que activa la respuesta; la **respuesta
 | R35 | **Error en el motor de riesgo** deja pasar una operación fuera de límites | Baja | Alto | Código puro con tests de casos normales, límites exactos y vetos; propiedades con hypothesis; cobertura ≥95% | Operación ejecutada que incumple un límite | Parada del sistema; incidente; test de regresión |
 | R36 | **Autoejecución de nivel A errónea** | Baja | Alto | Mismo riesgo que nivel B; máximo 1 al día; apagado tras 2 pérdidas seguidas; ventana de veto de 20-30 min | 2 pérdidas seguidas de nivel A | Apagado automático del nivel A (previsto en ADR-006) |
 | R37 | **Datos atrasados o feed caído** generan señales con precios viejos | Media | Medio | Bloqueo de entradas por datos atrasados en el motor de riesgo | Edad del dato > umbral configurado | Veto pre-trade y alerta |
+| R38 | **Teléfono perdido o comprometido** | Media | Medio | El teléfono no tiene claves de exchange; biometría y TOTP para acciones críticas; desde la app no se puede activar `LIVE_TRADING` ni cambiar límites (ADR-010) | Pérdida del dispositivo o acción no reconocida en la auditoría | Revocar la clave del dispositivo en el backend; kill switch si hace falta |
+| R39 | **Frase semilla o clave privada de MetaMask expuesta** en el sistema, el chat o el repositorio | Baja | Alto | Nunca se piden ni se guardan (ADR-009); gitleaks; la app y el chat no las aceptan | Cualquier aparición en logs, chat o commits | Mover los fondos a una wallet nueva de inmediato; incidente |
 
 ## Riesgos de proyecto
 

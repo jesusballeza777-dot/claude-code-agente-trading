@@ -14,3 +14,6 @@ Un ADR solo pasa a **Aceptado** con la aprobación explícita del propietario. L
 | [006](006-aprobacion-por-niveles-a-b.md) | Aprobación por niveles A/B | Aceptado |
 | [007](007-motor-de-riesgo-v0.md) | Motor de riesgo v0: diseño e interpretación de los límites | Aceptado |
 | [008](008-mejora-continua-sin-topes-y-aprendizaje-automatico.md) | Mejora continua sin topes del proyecto; aprendizaje automático como hipótesis pre-registrada | Aceptado |
+| [009](009-hyperliquid-con-wallet-de-agente.md) | Hyperliquid como segunda plataforma, con wallet de agente sin retiros | Aceptado |
+| [010](010-app-android-de-control-y-reportes.md) | App Android de control, dashboard y reportes | Aceptado |
+| [011](011-autonomia-por-evidencia.md) | Autonomía por evidencia | Aceptado |
