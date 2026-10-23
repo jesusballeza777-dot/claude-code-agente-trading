@@ -64,3 +64,14 @@ logs/
 .DS_Store
 .idea/
 .vscode/
+
+# --- Android (app/android) -----------------------------------------------------------
+.gradle/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+captures/
+.cxx/
+.externalNativeBuild/
