@@ -149,7 +149,7 @@ de gasto, horas y avance.
 | Decidir entre Claude Max 5x y Pro + API | **Decidido:** Max 5x + API por consumo para el analista | S3, ADR-003 |
 | Documento de requisitos v2 | Vigente | este documento |
 | ADR-001 a 008 | **Aceptados** por el propietario | `docs/adr/` |
-| Pre-registro | **Aprobado** por el propietario: protocolo común v1, H1-v1, H2-v1, H4-v1; H3 aplazada a la F9. Se fusiona en `main` con hash anotado | `research/preregistration/` |
+| Pre-registro | **Aprobado** por el propietario: protocolo común v1, H1-v1, H2-v1, H4-v1; H3 aplazada a la F9. Fusionado en `main`: commit `4614d65` | `research/preregistration/` |
 | Límites de riesgo firmados | **Firmados** con la aceptación de ADR-007 | `src/trading/risk/limits_f7_f8.toml` |
 
 La F0 queda cerrada. Lo único que sigue abierto del plan §8 es la verificación de los futuros para México, que es de la F1.
