@@ -12,3 +12,4 @@ Un ADR solo pasa a **Aceptado** con la aprobación explícita del propietario. L
 | [004](004-horizonte-4h-y-1d.md) | Horizonte: velas de 4h y 1d | Propuesto |
 | [005](005-numeracion-de-fases-f0-f9.md) | Numeración de fases F0-F9 | Propuesto |
 | [006](006-aprobacion-por-niveles-a-b.md) | Aprobación por niveles A/B | Propuesto |
+| [007](007-motor-de-riesgo-v0.md) | Motor de riesgo v0: diseño e interpretación de los límites | Propuesto |

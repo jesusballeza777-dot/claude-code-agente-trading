@@ -1,0 +1,23 @@
+# Límites del motor de riesgo para las fases F7-F8 (plan maestro v2, sección 3).
+# Cambiar cualquier valor requiere un ADR aprobado por el propietario (CLAUDE.md, regla 4).
+# El código rechaza cualquier valor que supere los techos del plan (ver limits.py).
+# Fracciones sobre el capital: 0.005 = 0.5%.
+
+[risk]
+risk_per_trade = 0.005                 # 0.5% = USD 7.50 con USD 1,500
+max_effective_leverage = 2             # posición total / capital
+min_liquidation_to_stop_ratio = 3      # distancia a liquidación >= 3 x distancia al stop
+max_daily_loss = 0.02
+max_weekly_loss = 0.04
+drawdown_halt = 0.15                   # sin nuevas entradas (USD 225 con USD 1,500)
+drawdown_hard_stop = 0.20              # corte duro: cerrar posiciones (USD 300 con USD 1,500)
+
+[exposure]
+correlated_groups = [["BTC", "ETH"]]   # una sola exposición (correlación ~0.8)
+short_enabled_strategies = []          # ninguna estrategia validada en ambas direcciones todavía
+
+# PROPUESTO (no está en el plan): umbrales de datos atrasados pendientes de aprobación (ADR-007).
+[data_freshness]
+max_price_age_seconds = 60             # edad máxima del precio usado para la entrada
+max_bar_lag_seconds = 300              # retraso tolerado de la siguiente vela cerrada
+max_clock_skew_seconds = 5             # marcas de tiempo en el futuro toleradas
