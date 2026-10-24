@@ -1,0 +1,50 @@
+{
+  "name": "centro-de-mando",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Centro de Mando del agente de trading: solo lectura respecto al dinero (ADR-014, ADR-015).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "capturas": "CAPTURAS=1 playwright test e2e/capturas.spec.ts"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource-variable/space-grotesk": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@radix-ui/react-dialog": "1.3.1",
+    "@radix-ui/react-switch": "1.4.1",
+    "@radix-ui/react-tabs": "1.2.1",
+    "@radix-ui/react-tooltip": "1.4.1",
+    "@tanstack/react-query": "5.104.5",
+    "lightweight-charts": "5.2.1",
+    "lucide-react": "1.61.0",
+    "motion": "14.6.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router": "8.5.0",
+    "recharts": "3.10.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/vite": "4.3.3",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.8",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "jsdom": "30.1.3",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  }
+}

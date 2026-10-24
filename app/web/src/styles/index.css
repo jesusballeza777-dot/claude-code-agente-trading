@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/*
+ * Tokens de diseño del Centro de Mando: un único sitio para colores, tipografía, radios y
+ * sombras. Tema oscuro "sala de control" por defecto; tema claro con la misma semántica.
+ * Semántica: ganancia, pérdida, alerta, neutral y demo. Nunca solo color: siempre va con un
+ * icono o un patrón (accesibilidad, contraste AA comprobado con axe).
+ */
+:root {
+  --canvas: #f3f7f7;
+  --surface: #ffffff;
+  --surface-2: #e9f1f2;
+  --line: #c9d9dc;
+  --ink: #0b2a33;
+  --ink-muted: #46636a;
+  --accent: #08695e;
+  --accent-soft: #d3efeb;
+  --accent-ink: #ffffff;
+  --gain: #0f766e;
+  --loss: #b42318;
+  --warn: #8a5a00;
+  --neutral: #52646b;
+  --demo: #9a4d00;
+  --demo-soft: #fdf0dd;
+  --shadow: 0 1px 2px rgb(11 42 51 / 0.06), 0 8px 24px rgb(11 42 51 / 0.06);
+}
+
+.dark {
+  --canvas: #04161b;
+  --surface: #0a242c;
+  --surface-2: #0f3039;
+  --line: #1d4652;
+  --ink: #e4f1f1;
+  --ink-muted: #9db7ba;
+  --accent: #2dd4bf;
+  --accent-soft: #0d3d3d;
+  --accent-ink: #04161b;
+  --gain: #4ade9b;
+  --loss: #fb8b8b;
+  --warn: #f5c35a;
+  --neutral: #9aabb1;
+  --demo: #f5b54a;
+  --demo-soft: #3a2a10;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px rgb(0 0 0 / 0.25);
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
+  --color-warn: var(--warn);
+  --color-neutral: var(--neutral);
+  --color-demo: var(--demo);
+  --color-demo-soft: var(--demo-soft);
+  --font-display: "Space Grotesk Variable", "Inter Variable", system-ui, sans-serif;
+  --font-sans: "Inter Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --radius-card: 1rem;
+  --shadow-card: var(--shadow);
+}
+
+@layer base {
+  html {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100dvh;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .cifra {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Patrón de franjas para "demo": se distingue sin depender del color. */
+  .franjas-demo {
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0 10px,
+      color-mix(in srgb, var(--demo) 14%, transparent) 10px 20px
+    );
+  }
+  .marca-agua-demo::after {
+    content: "DATOS DE DEMOSTRACIÓN";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1rem, 4vw, 2.2rem);
+    letter-spacing: 0.12em;
+    color: color-mix(in srgb, var(--demo) 22%, transparent);
+    transform: rotate(-12deg);
+    pointer-events: none;
+  }
+}

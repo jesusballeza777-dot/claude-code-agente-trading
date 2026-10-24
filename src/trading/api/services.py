@@ -401,7 +401,7 @@ class Services:
     def correlations(self) -> dict[str, Any]:
         if not self.data_available():
             return {"origen": "demo", "simbolos": [], "matriz": []}
-        symbols = self.symbols()["simbolos"][:10]
+        symbols = self._latest_universe() or self.symbols()["simbolos"][:10]
         start = HOLDOUT_START - timedelta(days=91)
         returns: dict[str, dict[datetime, float]] = {}
         for symbol in symbols:
@@ -418,6 +418,14 @@ class Services:
             "simbolos": symbols,
             "matriz": matrix,
         }
+
+    def _latest_universe(self) -> list[str]:
+        """Miembros del último universo de H2 (docs/datos/universo-h2-v1.md), por liquidez."""
+        for table in read_tables(self.repo / "docs" / "datos" / "universo-h2-v1.md"):
+            rows = [plain(r.get("Miembros (por liquidez)", "")) for r in table]
+            if rows and rows[-1] not in ("", "—"):
+                return [s.strip() for s in rows[-1].split(",")]
+        return []
 
     # --- riesgo ------------------------------------------------------------------------------
 
