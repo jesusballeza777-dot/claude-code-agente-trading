@@ -92,6 +92,13 @@ test("ajustes: en el navegador no hay enlace a la app Android", async ({ page })
 test.describe("dentro de la app Android", () => {
   test.use({ userAgent: "Mozilla/5.0 (Linux; Android 15) Chrome/130 Mobile BrujulaAndroid/0.2.0" });
 
+  test("la web no repite la barra inferior: la app tiene la suya", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/riesgo");
+    await settle(page);
+    await expect(page.getByRole("navigation", { name: "Secciones (móvil)" })).toHaveCount(0);
+  });
+
   test("ajustes: enlace a los ajustes nativos de la app", async ({ page }) => {
     await page.goto("/ajustes");
     await settle(page);

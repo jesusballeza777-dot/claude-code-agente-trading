@@ -1,0 +1,147 @@
+{
+ "origen": "real",
+ "hora_utc": "2026-10-24T03:02:34Z",
+ "live_trading": false,
+ "motores": [
+  {
+   "id": "api",
+   "nombre": "Centro de Mando",
+   "estado": "activo",
+   "detalle": "API de solo lectura respondiendo"
+  },
+  {
+   "id": "datos",
+   "nombre": "Datos públicos de Binance",
+   "estado": "activo",
+   "detalle": "última vela 2024-12-31 (periodo de investigación)"
+  },
+  {
+   "id": "riesgo",
+   "nombre": "Motor de riesgo",
+   "estado": "activo",
+   "detalle": "límites 6d43d140ae2d con veto absoluto"
+  },
+  {
+   "id": "exchanges",
+   "nombre": "Binance e Hyperliquid",
+   "estado": "no conectado",
+   "detalle": "sin claves: llega con la F1 y la F6"
+  },
+  {
+   "id": "analista",
+   "nombre": "Analista Claude",
+   "estado": "no iniciado",
+   "detalle": "empieza en la F5"
+  },
+  {
+   "id": "sombra",
+   "nombre": "Simulación en sombra",
+   "estado": "no iniciado",
+   "detalle": "empieza en la F7 (≥12 semanas)"
+  },
+  {
+   "id": "ejecucion",
+   "nombre": "Ejecución real",
+   "estado": "apagada",
+   "detalle": "LIVE_TRADING apagado"
+  }
+ ],
+ "eventos": [],
+ "total_eventos": 0,
+ "decisiones": {
+  "origen": "demo",
+  "aviso": "Ejemplos: el analista Claude empieza en la F5.",
+  "items": [
+   {
+    "t": "2026-10-06T20:00:00+00:00",
+    "accion": "EXIT",
+    "nivel": "A",
+    "motivo": "Ejemplo: sin señal válida",
+    "evidencia": [],
+    "veto": null,
+    "json": {
+     "action": "EXIT",
+     "hypothesis": "H2-v1",
+     "symbol": "BTCUSDT",
+     "demo": true
+    }
+   },
+   {
+    "t": "2026-10-06T12:00:00+00:00",
+    "accion": "ENTER_LONG",
+    "nivel": "B",
+    "motivo": "Ejemplo: ruptura del canal con volatilidad creciente",
+    "evidencia": [
+     "H2-v1 §4",
+     "motor de riesgo"
+    ],
+    "veto": null,
+    "json": {
+     "action": "ENTER_LONG",
+     "hypothesis": "H2-v1",
+     "symbol": "BTCUSDT",
+     "demo": true
+    }
+   },
+   {
+    "t": "2026-10-06T04:00:00+00:00",
+    "accion": "HOLD",
+    "nivel": "A",
+    "motivo": "Ejemplo: sin señal válida",
+    "evidencia": [],
+    "veto": null,
+    "json": {
+     "action": "HOLD",
+     "hypothesis": "H2-v1",
+     "symbol": "BTCUSDT",
+     "demo": true
+    }
+   },
+   {
+    "t": "2026-10-05T20:00:00+00:00",
+    "accion": "ABSTAIN",
+    "nivel": "A",
+    "motivo": "Ejemplo: sin señal válida",
+    "evidencia": [],
+    "veto": null,
+    "json": {
+     "action": "ABSTAIN",
+     "hypothesis": "H2-v1",
+     "symbol": "BTCUSDT",
+     "demo": true
+    }
+   },
+   {
+    "t": "2026-10-05T12:00:00+00:00",
+    "accion": "HOLD",
+    "nivel": "A",
+    "motivo": "Ejemplo: sin señal válida",
+    "evidencia": [],
+    "veto": null,
+    "json": {
+     "action": "HOLD",
+     "hypothesis": "H2-v1",
+     "symbol": "BTCUSDT",
+     "demo": true
+    }
+   },
+   {
+    "t": "2026-10-05T04:00:00+00:00",
+    "accion": "ENTER_SHORT",
+    "nivel": "B",
+    "motivo": "Ejemplo: ruptura del canal con volatilidad creciente",
+    "evidencia": [
+     "H2-v1 §4",
+     "motor de riesgo"
+    ],
+    "veto": null,
+    "json": {
+     "action": "ENTER_SHORT",
+     "hypothesis": "H2-v1",
+     "symbol": "BTCUSDT",
+     "demo": true
+    }
+   }
+  ]
+ }
+}

@@ -49,4 +49,6 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     testImplementation("junit:junit:4.13.2")
+    // org.json real para los tests de JVM (en Android ya viene incluido).
+    testImplementation("org.json:json:20240303")
 }

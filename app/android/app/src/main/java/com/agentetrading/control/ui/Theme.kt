@@ -21,6 +21,17 @@ private val Scheme =
         error = Color(0xFFFB8B8B),
     )
 
+/** Colores con significado, iguales a los de la web: ganancia, pérdida, alerta, neutral y demostración. */
+object Palette {
+    val Gain = Color(0xFF4ADE9B)
+    val Loss = Color(0xFFFB8B8B)
+    val Warn = Color(0xFFF5C35A)
+    val Demo = Color(0xFFF5B54A)
+    val DemoSoft = Color(0xFF3A2A10)
+    val Neutral = Color(0xFF9AABB1)
+    val AccentSoft = Color(0xFF0D3D3D)
+}
+
 @Composable
 fun BrujulaTheme(content: @Composable () -> Unit) {
     MaterialTheme(colorScheme = Scheme, content = content)

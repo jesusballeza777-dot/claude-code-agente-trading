@@ -20,6 +20,7 @@ import {
   cx,
 } from "../components/ui";
 import { api, type Decisiones as DecisionesData, type Diario as DiarioData, type Limites, type Proyecto as ProyectoData, type Reportes as ReportesData } from "../lib/api";
+import { IN_ANDROID_APP } from "../lib/env";
 import { fechaHora, pct, r, usd } from "../lib/format";
 import { usePrefs } from "../lib/prefs";
 
@@ -310,9 +311,6 @@ export function Reportes() {
     </>
   );
 }
-
-/** La app Android añade "BrujulaAndroid" al agente de usuario del WebView (ADR-018). */
-const IN_ANDROID_APP = /BrujulaAndroid/.test(navigator.userAgent);
 
 export function Ajustes() {
   const { theme, setTheme, explain, setExplain, setWelcomed } = usePrefs();

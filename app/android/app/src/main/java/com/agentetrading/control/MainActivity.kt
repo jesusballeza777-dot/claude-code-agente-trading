@@ -25,7 +25,7 @@ import com.agentetrading.control.security.LockPolicy
 import com.agentetrading.control.ui.BrujulaTheme
 import com.agentetrading.control.ui.ConnectScreen
 import com.agentetrading.control.ui.LockScreen
-import com.agentetrading.control.ui.WebScreen
+import com.agentetrading.control.ui.AppShell
 
 /**
  * App personal de control: cliente de solo lectura del Centro de Mando (ADR-018).
@@ -138,7 +138,7 @@ class MainActivity : FragmentActivity() {
                     )
                 Screen.WEB ->
                     prefs.serverUrl?.let { url ->
-                        WebScreen(baseUrl = url, lifecycle = lifecycle, onOpenSettings = { screen = Screen.SETTINGS })
+                        AppShell(baseUrl = url, lifecycle = lifecycle, onOpenSettings = { screen = Screen.SETTINGS })
                     }
             }
         }

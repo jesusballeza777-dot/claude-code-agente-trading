@@ -22,7 +22,7 @@
 | Capturas reproducibles (oscuro, claro y móvil de las 10 páginas) | `docs/capturas/`; `CAPTURAS=1 npx playwright test e2e/capturas.spec.ts` | [confirmado] |
 | `docker compose up --build`: base, backend y app en `127.0.0.1:8080` | Job `docker` de CI (ejecución 22, `e3983c0`): construye las imágenes, levanta las tres piezas y descarga un PDF por nginx; en local se probaron además notas, Excel y CSV | [confirmado] |
 | Centro de Mando en el celular: página En vivo (sondeo cada 5 s), barra inferior, instalable como app | `/api/en-vivo`, E2E de En vivo y navegación móvil; capturas `en-vivo-*` | [confirmado] |
-| App Android Brújula: cliente nativo con bloqueo biométrico, conexión validada, descargas y política de navegación | Tests de JVM de dirección, navegación y bloqueo; el APK lo compila CI (ADR-018) | [confirmado] la lógica; la interfaz **por verificar** en un teléfono |
+| App Android Brújula: Hoy y En vivo nativas, bloqueo biométrico, conexión validada, inicio de sesión, descargas y política de navegación | 29 tests de JVM (cliente HTTP con login contra servidor local, lectura de respuestas reales, dirección, navegación, bloqueo, formato) y test de contrato en Python; el APK lo compila CI (ADR-018) | [confirmado] la lógica; la interfaz **por verificar** en un teléfono |
 
 ## 2. Qué falta, por fase
 

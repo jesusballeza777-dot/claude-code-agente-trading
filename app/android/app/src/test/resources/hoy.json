@@ -1,0 +1,360 @@
+{
+ "estado": {
+  "origen": "real",
+  "fase_actual": "F4 en curso (investigación con datos públicos); F1 pendiente del propietario",
+  "fases": [
+   {
+    "id": "F0",
+    "nombre": "Alcance y gobernanza",
+    "estado": "cerrada"
+   },
+   {
+    "id": "F1",
+    "nombre": "Plataforma (verificaciones del propietario)",
+    "estado": "pendiente del propietario"
+   },
+   {
+    "id": "F2",
+    "nombre": "Fundaciones: CI, motor de riesgo, auditoría",
+    "estado": "en curso"
+   },
+   {
+    "id": "F3",
+    "nombre": "Datos públicos sin claves",
+    "estado": "en curso: falta 2.ª fuente"
+   },
+   {
+    "id": "F4",
+    "nombre": "Investigación y backtests",
+    "estado": "en curso: holdout sellado"
+   },
+   {
+    "id": "F5",
+    "nombre": "Analista Claude",
+    "estado": "no empezada"
+   },
+   {
+    "id": "F6",
+    "nombre": "Riesgo y ejecución",
+    "estado": "no empezada"
+   },
+   {
+    "id": "F7",
+    "nombre": "Simulación en sombra (≥12 semanas)",
+    "estado": "no empezada"
+   },
+   {
+    "id": "F8",
+    "nombre": "Piloto real con USD 1,500",
+    "estado": "no empezada"
+   },
+   {
+    "id": "F9",
+    "nombre": "Escala",
+    "estado": "no empezada"
+   }
+  ],
+  "live_trading": false,
+  "holdout": {
+   "desde": "2025-01-01",
+   "sellado": true
+  },
+  "datos": {
+   "disponible": true,
+   "dataset_id": "6a03830a1811a4a0f43d6bf891c9461728aa0f1b49f389fcdc8b36e67e6560c2",
+   "ficheros": 1,
+   "ultima_vela": "2024-12-31",
+   "completitud": 0.998767
+  },
+  "motor_de_riesgo": {
+   "limites": "F7-F8 firmados (ADR-007)",
+   "version_limites": "6d43d140ae2d",
+   "reglas_v1": "propuestas (ADR-013), activas en simulación",
+   "estado": "operativo"
+  },
+  "intentos": {
+   "principales": 2,
+   "total": 4
+  },
+  "pendientes_propietario": [
+   {
+    "tarea": "Verificar en Binance que tu cuenta permite futuros USDⓈ-M, comisiones y nocional mínimo",
+    "documento": "docs/f1-verificacion-plataforma.md"
+   },
+   {
+    "tarea": "Generar tu clave age y compartir solo la pública para SOPS",
+    "documento": "ops/secrets.md"
+   },
+   {
+    "tarea": "Aprobar o ajustar el ADR-013 (reglas de riesgo más restrictivas)",
+    "documento": "docs/adr/013-motor-de-riesgo-v1-reglas-ampliadas.md"
+   },
+   {
+    "tarea": "Reclamar los créditos de API de Max 5x en la consola",
+    "documento": "docs/presupuesto.md"
+   },
+   {
+    "tarea": "Revisar los resultados de la F4 y decidir los siguientes pre-registros",
+    "documento": "docs/resultados/f4-analisis.md"
+   },
+   {
+    "tarea": "Validar el formato del reporte fiscal con tu contador",
+    "documento": "docs/app/especificacion.md"
+   },
+   {
+    "tarea": "Cuando haya VPS: crear las credenciales del Centro de Mando en tu ordenador",
+    "documento": "README.md"
+   }
+  ]
+ },
+ "parte_del_dia": {
+  "autor": "Brújula",
+  "texto": "Hoy no hay dinero en juego: el sistema está en modo investigación y LIVE_TRADING sigue apagado. Los datos públicos de 2020-2024 están completos al 99.88% y el holdout sigue sellado. En el laboratorio hay 2 hipótesis evaluadas; 0 pasan los criterios 1-8 del gate sin abrir el holdout. Que ninguna pase no es un fracaso: es el examen funcionando. Mejor saberlo ahora que con dinero. No operar también es una decisión, y mientras no haya evidencia, es la correcta.",
+  "validado": true
+ },
+ "cuenta": {
+  "origen": "demo",
+  "capital": "1500.34",
+  "maximo": "1524.08",
+  "drawdown": 0.017469313771204618,
+  "umbrales": {
+   "parada": 0.15,
+   "corte_duro": 0.2
+  },
+  "presupuesto": {
+   "diario": {
+    "usado": 0.004,
+    "limite": 0.02,
+    "texto": "Vas usando 0.4% de tu 2% de pérdida diaria. Margen de sobra."
+   },
+   "semanal": {
+    "usado": 0.011,
+    "limite": 0.04
+   }
+  },
+  "curva": [
+   {
+    "t": "2026-09-01",
+    "capital": 1499.06
+   },
+   {
+    "t": "2026-09-02",
+    "capital": 1502.73
+   },
+   {
+    "t": "2026-09-03",
+    "capital": 1501.97
+   },
+   {
+    "t": "2026-09-04",
+    "capital": 1500.68
+   },
+   {
+    "t": "2026-09-05",
+    "capital": 1495.7
+   },
+   {
+    "t": "2026-09-06",
+    "capital": 1495.02
+   },
+   {
+    "t": "2026-09-07",
+    "capital": 1502.27
+   },
+   {
+    "t": "2026-09-08",
+    "capital": 1505.42
+   },
+   {
+    "t": "2026-09-09",
+    "capital": 1512.26
+   },
+   {
+    "t": "2026-09-10",
+    "capital": 1514.37
+   },
+   {
+    "t": "2026-09-11",
+    "capital": 1517.37
+   },
+   {
+    "t": "2026-09-12",
+    "capital": 1519.1
+   },
+   {
+    "t": "2026-09-13",
+    "capital": 1509.59
+   },
+   {
+    "t": "2026-09-14",
+    "capital": 1515.36
+   },
+   {
+    "t": "2026-09-15",
+    "capital": 1519.03
+   },
+   {
+    "t": "2026-09-16",
+    "capital": 1522.67
+   },
+   {
+    "t": "2026-09-17",
+    "capital": 1512.98
+   },
+   {
+    "t": "2026-09-18",
+    "capital": 1503.03
+   },
+   {
+    "t": "2026-09-19",
+    "capital": 1498.28
+   },
+   {
+    "t": "2026-09-20",
+    "capital": 1496.07
+   },
+   {
+    "t": "2026-09-21",
+    "capital": 1498.5
+   },
+   {
+    "t": "2026-09-22",
+    "capital": 1498.82
+   },
+   {
+    "t": "2026-09-23",
+    "capital": 1502.55
+   },
+   {
+    "t": "2026-09-24",
+    "capital": 1499.29
+   },
+   {
+    "t": "2026-09-25",
+    "capital": 1501.74
+   },
+   {
+    "t": "2026-09-26",
+    "capital": 1504.71
+   },
+   {
+    "t": "2026-09-27",
+    "capital": 1501.33
+   },
+   {
+    "t": "2026-09-28",
+    "capital": 1512.25
+   },
+   {
+    "t": "2026-09-29",
+    "capital": 1516.22
+   },
+   {
+    "t": "2026-09-30",
+    "capital": 1524.08
+   },
+   {
+    "t": "2026-10-01",
+    "capital": 1520.91
+   },
+   {
+    "t": "2026-10-02",
+    "capital": 1517.02
+   },
+   {
+    "t": "2026-10-03",
+    "capital": 1515.54
+   },
+   {
+    "t": "2026-10-04",
+    "capital": 1515.5
+   },
+   {
+    "t": "2026-10-05",
+    "capital": 1519.94
+   },
+   {
+    "t": "2026-10-06",
+    "capital": 1522.06
+   },
+   {
+    "t": "2026-10-07",
+    "capital": 1519.94
+   },
+   {
+    "t": "2026-10-08",
+    "capital": 1514.73
+   },
+   {
+    "t": "2026-10-09",
+    "capital": 1512.18
+   },
+   {
+    "t": "2026-10-10",
+    "capital": 1520.17
+   },
+   {
+    "t": "2026-10-11",
+    "capital": 1515.87
+   },
+   {
+    "t": "2026-10-12",
+    "capital": 1517.96
+   },
+   {
+    "t": "2026-10-13",
+    "capital": 1521.16
+   },
+   {
+    "t": "2026-10-14",
+    "capital": 1512.7
+   },
+   {
+    "t": "2026-10-15",
+    "capital": 1513.6
+   },
+   {
+    "t": "2026-10-16",
+    "capital": 1522.11
+   },
+   {
+    "t": "2026-10-17",
+    "capital": 1510.46
+   },
+   {
+    "t": "2026-10-18",
+    "capital": 1509.12
+   },
+   {
+    "t": "2026-10-19",
+    "capital": 1509.08
+   },
+   {
+    "t": "2026-10-20",
+    "capital": 1504.75
+   },
+   {
+    "t": "2026-10-21",
+    "capital": 1508.35
+   },
+   {
+    "t": "2026-10-22",
+    "capital": 1508.58
+   },
+   {
+    "t": "2026-10-23",
+    "capital": 1500.34
+   }
+  ]
+ },
+ "posiciones": {
+  "origen": "real",
+  "items": [],
+  "vacio": "No hay posiciones: la simulación en sombra empieza en la F7. Mientras tanto, prueba la calculadora de riesgo con el motor real."
+ },
+ "eventos_macro": {
+  "origen": "real",
+  "items": [],
+  "vacio": "El calendario macro (FOMC, CPI, NFP) llega con la F6. Las reglas del ADR-013 ya bloquean entradas 2 h antes y después."
+ }
+}

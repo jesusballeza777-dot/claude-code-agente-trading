@@ -65,7 +65,7 @@ private const val SURFACE = 0xFF0A242C.toInt()
  * No hay puente JavaScript: la página no puede llamar a código nativo.
  */
 @Composable
-fun WebScreen(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit) {
+fun WebScreen(baseUrl: String, lifecycle: Lifecycle, path: String, onOpenSettings: () -> Unit) {
     val context = LocalContext.current
     var progress by remember { mutableFloatStateOf(0f) }
     var failure by remember(baseUrl) { mutableStateOf<String?>(null) }
@@ -137,7 +137,7 @@ fun WebScreen(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit)
         }
     val (refreshLayout, webView) = views
 
-    LaunchedEffect(baseUrl) { webView.loadUrl(baseUrl) }
+    LaunchedEffect(baseUrl, path) { webView.loadUrl(baseUrl + path) }
     BackHandler(enabled = canGoBack && failure == null) { webView.goBack() }
     DisposableEffect(webView, lifecycle) {
         // En segundo plano la página se detiene (y con ella el sondeo de En vivo).
@@ -178,7 +178,7 @@ fun WebScreen(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit)
                 Button(
                     onClick = {
                         failure = null
-                        webView.loadUrl(baseUrl)
+                        webView.loadUrl(baseUrl + path)
                     },
                 ) {
                     Text("Reintentar")

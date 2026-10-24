@@ -2,8 +2,11 @@
 
 Cliente nativo y de solo lectura del Centro de Mando (ADR-018). Es la app de celular personal del propietario.
 
-- **Qué hace:** abre el Centro de Mando de tu servidor (las diez páginas, En vivo, laboratorio, riesgo, reportes) con bloqueo
-  por huella, rostro o PIN, arrastrar para actualizar, descarga de reportes y pantalla de error con reintento.
+- **Qué hace:** abre el Centro de Mando de tu servidor con bloqueo por huella, rostro o PIN.
+  - **Hoy** y **En vivo** son pantallas nativas que se actualizan solas (En vivo cada 5 s, con la app al frente).
+  - **Laboratorio, Riesgo y Más** (Mercado, Decisiones, Diario, Proyecto, Reportes, Ajustes) muestran la web dentro de la app,
+    con arrastrar para actualizar, descarga de reportes y pantalla de error con reintento. Pasarán a nativo página por página.
+  - Si tu servidor tiene la autenticación activa, la app pide contraseña y código TOTP una sola vez por sesión.
 - **Qué no hace:** no envía órdenes, no activa `LIVE_TRADING`, no crea claves ni cambia límites, y no guarda claves de
   exchanges ni de wallets. Su único permiso es INTERNET.
 - **Datos:** vienen del servidor. Hoy el servidor es tu computadora (por cable USB) o, cuando exista, tu VPS con Tailscale.
@@ -40,8 +43,9 @@ cd app/android
 ./gradlew assembleDebug testDebugUnitTest
 ```
 
-El CI (job `android`) compila, ejecuta los tests y publica el APK. Los tests de JVM cubren la validación de la dirección,
-la política de navegación del WebView y el bloqueo; la interfaz y el WebView se comprobarán en un teléfono real
+El CI (job `android`) compila, ejecuta los tests y publica el APK. Los tests de JVM (29) cubren la validación de la dirección,
+la política de navegación del WebView, el bloqueo, el cliente HTTP con inicio de sesión (contra un servidor local), la lectura de las respuestas
+reales de la API y el formato; la interfaz y el WebView se comprobarán en un teléfono real
 (**por verificar**: este entorno no tiene SDK de Android).
 
 ## Dependencias y por qué
@@ -53,4 +57,4 @@ la política de navegación del WebView y el bloqueo; la interfaz y el WebView s
 | activity-compose 1.9.3, fragment 1.8.5 | Actividad con Compose y base para el diálogo biométrico |
 | biometric 1.1.0 | Huella, rostro o PIN del teléfono |
 | swiperefreshlayout 1.1.0 | Arrastrar para actualizar sobre el WebView |
-| JUnit 4.13.2 | Tests de la lógica |
+| JUnit 4.13.2, org.json (solo tests) | Tests de la lógica, incluidos los del cliente HTTP contra un servidor local |

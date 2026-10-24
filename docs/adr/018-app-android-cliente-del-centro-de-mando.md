@@ -12,14 +12,17 @@ El esqueleto de la app Android (ADR-010) tenía cinco pantallas básicas con dat
 
 ## Decisión
 
-1. **La app Android es un cliente nativo delgado del Centro de Mando.** Muestra el mismo sitio en un `WebView` endurecido, así que tiene todas las páginas y se actualiza con la web sin publicar otro APK.
+1. **La app Android es un cliente nativo del Centro de Mando, que pasa a nativo página por página.**
+   - **Etapa 1 (hecha):** muestra el mismo sitio en un `WebView` endurecido, así que tiene todas las páginas y se actualiza con la web sin publicar otro APK.
+   - **Etapa 2 (en curso):** **Hoy** y **En vivo** son pantallas nativas (Compose) que leen `/api/hoy` y `/api/en-vivo` con un cliente HTTP propio. Laboratorio, Riesgo y el resto siguen en el `WebView` hasta que se pasen a nativo. Un test de contrato en Python (`tests/api/test_android_contract.py`) falla si un cambio de la API rompe lo que la app lee.
+   - **Etapa 3 (pendiente):** el resto de páginas, notificaciones (F6) y, si se decide en la F6, una fuente de datos local en el teléfono (ver el ADR de ejecución).
 2. **Lo nativo se limita a lo que el navegador no da bien:**
    - Pantalla de conexión que comprueba que la dirección es de verdad un Centro de Mando antes de guardarla.
    - Bloqueo con huella, rostro o PIN del teléfono (se pide al abrir y al volver tras un minuto fuera).
    - Ocultar la app en "recientes" y bloquear capturas (se puede desactivar).
    - Arrastrar para actualizar, botón atrás, descarga de reportes a la carpeta Descargas y pantalla de error con reintento.
    - Icono adaptable y tema oscuro desde el primer fotograma.
-3. **Tiempo casi real:** la página **En vivo** sondea `/api/en-vivo` cada 5 s; en segundo plano la página se detiene.
+3. **Tiempo casi real:** la pantalla **En vivo** sondea `/api/en-vivo` cada 5 s y **Hoy** cada 30 s, solo con la app al frente. Si el servidor deja de responder se conserva el último dato con un aviso, sin inventar nada. Con la autenticación activa, la app pide contraseña y código TOTP y comparte la sesión con el `WebView`; la sesión vive solo en memoria.
 4. **Seguridad del cliente:**
    - Solo HTTPS, salvo `127.0.0.1` y `localhost` (lo que da `adb reverse` por USB); lo aplican la validación de la dirección y la configuración de seguridad de red.
    - El `WebView` nunca sale del servidor propio: otros sitios https se abren en el navegador y todo lo demás se bloquea. Sin acceso a ficheros y sin contenido mixto.

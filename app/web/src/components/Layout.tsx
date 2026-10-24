@@ -22,6 +22,7 @@ import {
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router";
 import { api, type Estado } from "../lib/api";
+import { IN_ANDROID_APP } from "../lib/env";
 import { usePrefs } from "../lib/prefs";
 import { BrujulaAvatar } from "./Brujula";
 import { GlossaryButton, Onboarding } from "./Dialogs";
@@ -203,14 +204,14 @@ export function Layout() {
             </div>
           </div>
         </header>
-        <main id="contenido" className="mx-auto max-w-7xl px-4 pb-28 pt-5 sm:px-6 sm:pt-7 lg:pb-7">
+        <main id="contenido" className={cx("mx-auto max-w-7xl px-4 pt-5 sm:px-6 sm:pt-7", IN_ANDROID_APP ? "pb-6" : "pb-28 lg:pb-7")}>
           <Outlet />
         </main>
-        <footer className="px-6 pb-24 text-xs text-ink-muted lg:pb-6">
+        <footer className={cx("px-6 text-xs text-ink-muted", IN_ANDROID_APP ? "pb-6" : "pb-24 lg:pb-6")}>
           No es asesoría financiera, legal ni fiscal. La rentabilidad es una hipótesis que el sistema tiene que demostrar.
         </footer>
       </div>
-      <BottomBar />
+      {!IN_ANDROID_APP && <BottomBar />}
       <Onboarding />
     </div>
   );
