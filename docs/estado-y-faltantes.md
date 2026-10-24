@@ -20,7 +20,7 @@
 | Reportes PDF, Excel y CSV (semanal, mensual, ficha, contador) con procedencia y cadena de auditoría | `src/trading/reporting/`, ADR-017 | [confirmado] |
 | Tests de la app web: Vitest, E2E con Playwright y accesibilidad con axe en tema claro y oscuro | `app/web/src/**/*.test.ts*`, `app/web/e2e/` | [confirmado] |
 | Capturas reproducibles (oscuro, claro y móvil de las 10 páginas) | `docs/capturas/`; `CAPTURAS=1 npx playwright test e2e/capturas.spec.ts` | [confirmado] |
-| `docker compose up --build`: base, backend y app en `127.0.0.1:8080` | Probado en el entorno de desarrollo salvo la capa de Pango (ver §6); el job `docker` de CI lo construye completo | [confirmado] en parte |
+| `docker compose up --build`: base, backend y app en `127.0.0.1:8080` | Job `docker` de CI (ejecución 22, `e3983c0`): construye las imágenes, levanta las tres piezas y descarga un PDF por nginx; en local se probaron además notas, Excel y CSV | [confirmado] |
 | App Android (esqueleto con datos de demo) | Compila y pasa tests en CI (ADR-010) | [confirmado] |
 
 ## 2. Qué falta, por fase
@@ -79,7 +79,6 @@ Ninguno se puede hacer desde la app ni desde esta sesión: necesitan tus cuentas
 
 | Qué | Por qué no se pudo verificar aquí | Cómo se verifica |
 |---|---|---|
-| Capa de Pango de la imagen del backend (PDF dentro de Docker) | La red de la sesión bloquea `deb.debian.org` | Job `docker` de CI: construye la imagen y descarga un PDF por nginx |
 | `tailscale serve` y el arranque con `sops exec-env` en el VPS | No hay VPS ni Tailscale en esta sesión | Primer despliegue, siguiendo el README |
 | Nocional mínimo, comisiones y apalancamiento reales en Binance | Necesita tu cuenta | F1 (§3 punto 1) |
 | Fórmula de liquidación de Hyperliquid | La fórmula implementada no se ha contrastado con el exchange | F1 y testnet en la F6; mientras, el motor veta si falta el modelo |
