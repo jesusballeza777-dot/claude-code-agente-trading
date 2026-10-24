@@ -49,6 +49,13 @@ def main() -> None:
         }
         for name, path in paths.items():
             write(name, client.get(path).json())
+        for name, path in {
+            "mercado-simbolos": "/api/mercado/simbolos",
+            "mercado-velas": "/api/mercado/velas?simbolo=BTCUSDT&intervalo=4h&dias=30",
+            "mercado-regimenes": "/api/mercado/regimenes",
+            "mercado-correlaciones": "/api/mercado/correlaciones",
+        }.items():
+            write(name, client.get(path).json())
         write(
             "calculadora-aprobada",
             client.get("/api/riesgo/calculadora", params={**CALC, "stop": "58800"}).json(),
@@ -57,6 +64,19 @@ def main() -> None:
             "calculadora-vetada",
             client.get("/api/riesgo/calculadora", params={**CALC, "stop": "61000"}).json(),
         )
+
+
+def lab_from_the_real_results() -> None:
+    """El laboratorio sale de research/results (en el repositorio): resultados reales de la F4."""
+    with tempfile.TemporaryDirectory() as tmp:
+        client = client_for(REPO_ROOT, app_state=Path(tmp))
+        write("laboratorio", client.get("/api/laboratorio").json())
+        detail = client.get("/api/laboratorio/H2-v1").json()
+        detail["operaciones"] = []  # la app no las usa (están en el Diario) y pesan decenas de KB
+        for key in ("curva", "underwater"):  # recortadas a ~120 puntos: misma forma, ejemplo ligero
+            step = max(1, len(detail[key]) // 120)
+            detail[key] = detail[key][::step]
+        write("laboratorio-h2", detail)
 
 
 def write(name: str, data: object) -> None:
@@ -68,3 +88,4 @@ def write(name: str, data: object) -> None:
 
 if __name__ == "__main__":
     main()
+    lab_from_the_real_results()

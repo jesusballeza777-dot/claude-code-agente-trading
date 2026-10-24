@@ -64,10 +64,10 @@
  ],
  "historial": [
   {
-   "fecha_utc": "2026-10-24T03:26:25Z",
+   "fecha_utc": "2026-10-24T03:32:38Z",
    "tipo": "contador",
    "formato": "csv",
-   "archivo": "contador-20261024-0326-DEMO.csv",
+   "archivo": "contador-20261024-0332-DEMO.csv",
    "demo": true,
    "sha256": "1e21d41bc0e6d00d87ba65b805b6899aba6ea7a4c258ac91facc721d0b991a11"
   }

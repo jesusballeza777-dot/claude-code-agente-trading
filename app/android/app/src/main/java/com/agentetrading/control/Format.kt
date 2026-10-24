@@ -35,6 +35,9 @@ object Format {
         return grouped("0.00").format(value.setScale(2, RoundingMode.HALF_EVEN)) + "x"
     }
 
+    /** 1.8648 -> "1.86" con los decimales pedidos. */
+    fun decimal(value: Double, decimals: Int): String = grouped("0." + "0".repeat(decimals)).format(value)
+
     /** Resultado en múltiplos de riesgo: "+0.93 R", "-1.50 R". */
     fun r(value: Double): String = (if (value > 0) "+" else "") + grouped("0.00").format(value) + " R"
 

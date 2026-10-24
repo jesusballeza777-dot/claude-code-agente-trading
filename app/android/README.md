@@ -2,11 +2,12 @@
 
 Cliente nativo y de solo lectura del Centro de Mando (ADR-018). Es la app de celular personal del propietario.
 
-- **Qué hace:** abre el Centro de Mando de tu servidor con bloqueo por huella, rostro o PIN.
-  - **Hoy** y **En vivo** son pantallas nativas que se actualizan solas (En vivo cada 5 s, con la app al frente).
-  - **Laboratorio, Riesgo y Más** (Mercado, Decisiones, Diario, Proyecto, Reportes, Ajustes) muestran la web dentro de la app,
-    con arrastrar para actualizar, descarga de reportes y pantalla de error con reintento. Pasarán a nativo página por página.
-  - Si tu servidor tiene la autenticación activa, la app pide contraseña y código TOTP una sola vez por sesión.
+- **Qué hace:** abre tu Centro de Mando con bloqueo por huella, rostro o PIN. Todas las páginas son pantallas nativas:
+  **Hoy**, **En vivo** (se actualiza cada 5 s con la app al frente), **Laboratorio** (hipótesis, gate y gráficas),
+  **Riesgo** (calculadora con el motor real, límites y vetos), **Mercado** (velas con el canal de H2, funding, regímenes y
+  correlaciones), **Decisiones**, **Diario** (con notas), **Proyecto**, **Reportes** (descarga PDF, Excel y CSV) y **Ajustes**.
+  Si tu servidor tiene la autenticación activa, pide contraseña y código TOTP una sola vez por sesión.
+  Desde Ajustes también puedes abrir el Centro de Mando web completo dentro de la app.
 - **Qué no hace:** no envía órdenes, no activa `LIVE_TRADING`, no crea claves ni cambia límites, y no guarda claves de
   exchanges ni de wallets. Su único permiso es INTERNET.
 - **Datos:** vienen del servidor. Hoy el servidor es tu computadora (por cable USB) o, cuando exista, tu VPS con Tailscale.
@@ -43,7 +44,7 @@ cd app/android
 ./gradlew assembleDebug testDebugUnitTest
 ```
 
-El CI (job `android`) compila, ejecuta los tests y publica el APK. Los tests de JVM (29) cubren la validación de la dirección,
+El CI (job `android`) compila, ejecuta los tests y publica el APK. Los tests de JVM (64) cubren la validación de la dirección,
 la política de navegación del WebView, el bloqueo, el cliente HTTP con inicio de sesión (contra un servidor local), la lectura de las respuestas
 reales de la API y el formato; la interfaz y el WebView se comprobarán en un teléfono real
 (**por verificar**: este entorno no tiene SDK de Android).

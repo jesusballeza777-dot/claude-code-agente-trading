@@ -30,6 +30,7 @@ class Env(
     val onNeedsLogin: () -> Unit,
     val refresh: () -> Unit,
     val onOpenSettings: () -> Unit,
+    val onOpenWeb: () -> Unit = {},
 )
 
 @Composable
@@ -43,6 +44,7 @@ fun <T> Page(
     subtitle: String?,
     polled: Polled<T>,
     onRefresh: () -> Unit,
+    header: @Composable ColumnScope.() -> Unit = {},
     content: @Composable ColumnScope.(T) -> Unit,
 ) {
     val data = polled.data
@@ -59,6 +61,7 @@ fun <T> Page(
             }
             IconButton(onClick = onRefresh) { Icon(Icons.Filled.Refresh, contentDescription = "Actualizar") }
         }
+        this.header()
         when {
             data == null && polled.error != null -> ErrorBox(polled.error, onRefresh)
             data == null -> LoadingBox()

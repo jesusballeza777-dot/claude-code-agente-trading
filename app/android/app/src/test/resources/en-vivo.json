@@ -1,6 +1,6 @@
 {
  "origen": "real",
- "hora_utc": "2026-10-24T03:26:25Z",
+ "hora_utc": "2026-10-24T03:32:38Z",
  "live_trading": false,
  "motores": [
   {
@@ -48,14 +48,14 @@
  ],
  "eventos": [
   {
-   "t": "2026-10-24T03:26:25Z",
+   "t": "2026-10-24T03:32:38Z",
    "tipo": "nota",
    "texto": "Nota en el diario: Revisé el PBO: sigue en 0.456."
   },
   {
-   "t": "2026-10-24T03:26:25Z",
+   "t": "2026-10-24T03:32:38Z",
    "tipo": "reporte",
-   "texto": "Reporte generado: contador-20261024-0326-DEMO.csv"
+   "texto": "Reporte generado: contador-20261024-0332-DEMO.csv"
   }
  ],
  "total_eventos": 2,

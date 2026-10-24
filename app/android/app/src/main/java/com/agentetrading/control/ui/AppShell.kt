@@ -42,21 +42,22 @@ import androidx.lifecycle.Lifecycle
 import com.agentetrading.control.model.Parsers
 import com.agentetrading.control.net.ApiClient
 
-/** Todas las páginas de la app. Las que no son nativas todavía se muestran con la web (ADR-018). */
-private enum class Destination(val label: String, val native: Boolean = true) {
+/** Todas las páginas de la app. */
+private enum class Destination(val label: String) {
     HOY("Hoy"),
     EN_VIVO("En vivo"),
-    LABORATORIO("Laboratorio", native = false),
+    LABORATORIO("Laboratorio"),
     RIESGO("Riesgo"),
-    MERCADO("Mercado", native = false),
+    MERCADO("Mercado"),
     DECISIONES("Decisiones"),
     DIARIO("Diario"),
     PROYECTO("Proyecto"),
     REPORTES("Reportes"),
     AJUSTES("Ajustes"),
-    ;
 
-    val path: String get() = "/" + name.lowercase().replace('_', '-')
+    /** El Centro de Mando web completo dentro de la app: una salida para lo que aún no sea nativo. */
+    WEB("Centro de Mando web"),
+    ;
 }
 
 private class BarItem(val label: String, val icon: ImageVector, val destination: Destination?)
@@ -73,8 +74,8 @@ private val BAR =
 private val MORE = listOf(Destination.MERCADO, Destination.DECISIONES, Destination.DIARIO, Destination.PROYECTO, Destination.REPORTES, Destination.AJUSTES)
 
 /**
- * Pestañas de la app. Hoy, En vivo, Riesgo, Decisiones, Diario, Proyecto, Reportes y Ajustes son
- * nativas; Laboratorio y Mercado siguen con el mismo Centro de Mando web mientras se portan.
+ * Pestañas de la app: todas las páginas del Centro de Mando son nativas (ADR-018). La web completa
+ * queda como salida opcional desde Ajustes.
  */
 @Composable
 fun AppShell(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit) {
@@ -88,7 +89,7 @@ fun AppShell(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit) 
 
     val hoy = rememberPolled(client, "/api/hoy", 30_000, resumed && destination == Destination.HOY && !needsLogin, reload, { needsLogin = true }, Parsers::hoy)
     val vivo = rememberPolled(client, "/api/en-vivo", 5_000, resumed && destination == Destination.EN_VIVO && !needsLogin, reload, { needsLogin = true }, Parsers::enVivo)
-    val env = Env(client, baseUrl, resumed && !needsLogin, reload, { needsLogin = true }, { reload++ }, onOpenSettings)
+    val env = Env(client, baseUrl, resumed && !needsLogin, reload, { needsLogin = true }, { reload++ }, onOpenSettings) { destination = Destination.WEB }
 
     BackHandler(enabled = destination != Destination.HOY && !needsLogin) { destination = Destination.HOY }
 
@@ -125,13 +126,15 @@ fun AppShell(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit) 
                 when (destination) {
                     Destination.HOY -> HoyScreen(hoy) { reload++ }
                     Destination.EN_VIVO -> EnVivoScreen(vivo, now) { reload++ }
+                    Destination.LABORATORIO -> LaboratorioScreen(env)
                     Destination.RIESGO -> RiesgoScreen(env)
+                    Destination.MERCADO -> MercadoScreen(env)
                     Destination.DECISIONES -> DecisionesScreen(env)
                     Destination.DIARIO -> DiarioScreen(env)
                     Destination.PROYECTO -> ProyectoScreen(env)
                     Destination.REPORTES -> ReportesScreen(env)
                     Destination.AJUSTES -> AjustesScreen(env)
-                    Destination.LABORATORIO, Destination.MERCADO -> WebScreen(baseUrl, lifecycle, destination.path, onOpenSettings)
+                    Destination.WEB -> WebScreen(baseUrl, lifecycle, "/", onOpenSettings)
                 }
             }
         }

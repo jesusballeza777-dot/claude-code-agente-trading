@@ -14,8 +14,8 @@ El esqueleto de la app Android (ADR-010) tenía cinco pantallas básicas con dat
 
 1. **La app Android es un cliente nativo del Centro de Mando, que pasa a nativo página por página.**
    - **Etapa 1 (hecha):** muestra el mismo sitio en un `WebView` endurecido, así que tiene todas las páginas y se actualiza con la web sin publicar otro APK.
-   - **Etapa 2 (en curso):** **Hoy** y **En vivo** son pantallas nativas (Compose) que leen `/api/hoy` y `/api/en-vivo` con un cliente HTTP propio. Laboratorio, Riesgo y el resto siguen en el `WebView` hasta que se pasen a nativo. Un test de contrato en Python (`tests/api/test_android_contract.py`) falla si un cambio de la API rompe lo que la app lee.
-   - **Etapa 3 (pendiente):** el resto de páginas, notificaciones (F6) y, si se decide en la F6, una fuente de datos local en el teléfono (ver el ADR de ejecución).
+   - **Etapa 2 (hecha):** **todas** las páginas del Centro de Mando son pantallas nativas (Compose): Hoy, En vivo, Laboratorio, Riesgo (con la calculadora del motor real), Mercado (velas, funding, regímenes y correlaciones dibujados en la app), Decisiones, Diario, Proyecto, Reportes y Ajustes. Leen la API con un cliente HTTP propio, sin puente JavaScript. Un test de contrato en Python (`tests/api/test_android_contract.py`) falla si un cambio de la API rompe lo que la app lee. El `WebView` queda solo como salida opcional ("Abrir el Centro de Mando web", en Ajustes).
+   - **Etapa 3 (pendiente):** notificaciones (F6) y, si se decide en la F6, una fuente de datos local en el teléfono (ver el ADR de ejecución).
 2. **Lo nativo se limita a lo que el navegador no da bien:**
    - Pantalla de conexión que comprueba que la dirección es de verdad un Centro de Mando antes de guardarla.
    - Bloqueo con huella, rostro o PIN del teléfono (se pide al abrir y al volver tras un minuto fuera).

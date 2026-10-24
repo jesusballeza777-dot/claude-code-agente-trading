@@ -6,10 +6,13 @@ Las respuestas de ejemplo de la app (app/android/.../test/resources) son salidas
 """
 
 import json
+import re
+from pathlib import Path
 from typing import Any
 
 from fastapi.testclient import TestClient
 
+from api_fixtures import client_for
 from trading.data.holdout import REPO_ROOT
 
 RESOURCES = REPO_ROOT / "app" / "android" / "app" / "src" / "test" / "resources"
@@ -179,6 +182,89 @@ REPORTES: dict[str, type] = {
     "historial[].demo": bool,
 }
 
+LABORATORIO: dict[str, type] = {
+    "origen": str,
+    "hipotesis[].id": str,
+    "hipotesis[].titulo": str,
+    "hipotesis[].evaluada": bool,
+    "hipotesis[].ciclo[].etapa": str,
+    "hipotesis[].ciclo[].estado": str,
+    "hipotesis[].resumen.operaciones": int,
+    "hipotesis[].resumen.esperanza_r": float,
+    "hipotesis[].gate.pasa_sin_holdout": bool,
+    "hipotesis[].gate.criterios": dict,
+    "hipotesis[].pista": str,
+    "hipotesis[].corridas": int,
+    "intentos.principales": int,
+    "intentos.total": int,
+    "intentos.explicacion": str,
+    "prereg_commit": str,
+}
+LABORATORIO_DETALLE: dict[str, type] = {
+    "origen": str,
+    "id": str,
+    "titulo": str,
+    "trial_id": str,
+    "parametros": dict,
+    "codigo_commit": str,
+    "dataset_id": str,
+    "resumen.operaciones": int,
+    "resumen.esperanza_r": float,
+    "resumen.ic90_r": list,
+    "resumen.tasa_acierto": float,
+    "resumen.por_direccion": dict,
+    "resumen.por_regimen": dict,
+    "resumen.por_semestre": dict,
+    "gate.criterios": dict,
+    "gate.pasa_gate_sin_holdout": bool,
+    "gate.holdout": str,
+    "gate.valores.operaciones": int,
+    "gate.valores.ic90_r": list,
+    "gate.valores.dsr": float,
+    "gate.valores.pbo": float,
+    "gate.valores.maxdd_p95_mc": float,
+    "gate.valores.costes_x1.5_ic90": list,
+    "gate.valores.regimenes_positivos": list,
+    "curva[].t": str,
+    "curva[].capital": float,
+    "underwater[].t": str,
+    "underwater[].dd": float,
+    "distribucion_r[].desde": float,
+    "distribucion_r[].hasta": float,
+    "distribucion_r[].n": int,
+    "mapa_mensual[].mes": str,
+    "mapa_mensual[].r": float,
+    "abanico_monte_carlo[].operacion": int,
+    "abanico_monte_carlo[].p5": float,
+    "abanico_monte_carlo[].p50": float,
+    "abanico_monte_carlo[].p95": float,
+    "sensibilidad[].parametro": str,
+    "sensibilidad[].base": float,
+    "sensibilidad[].valores[].valor": float,
+    "sensibilidad[].valores[].esperanza_r": float,
+    "vetos[].codigo": str,
+    "vetos[].titulo": str,
+    "vetos[].veces": int,
+}
+MERCADO_SIMBOLOS: dict[str, type] = {"origen": str, "simbolos": list}
+MERCADO_VELAS: dict[str, type] = {
+    "origen": str,
+    "simbolo": str,
+    "intervalo": str,
+    "velas[].t": str,
+    "velas[].o": float,
+    "velas[].h": float,
+    "velas[].l": float,
+    "velas[].c": float,
+    "indicadores.canal_alto": list,
+    "indicadores.canal_bajo": list,
+    "marcadores": list,
+    "funding[].t": str,
+    "funding[].tasa_8h": float,
+}
+MERCADO_REGIMENES: dict[str, type] = {"origen": str, "tramos": list}
+MERCADO_CORRELACIONES: dict[str, type] = {"origen": str, "simbolos": list, "matriz": list}
+
 CALC_QUERY = {
     "simbolo": "BTCUSDT",
     "mercado": "PERPETUAL",
@@ -190,7 +276,8 @@ CALC_QUERY = {
 
 
 def _walk(node: Any, path: str) -> Any:
-    for part in path.split("."):
+    # El punto separa niveles, salvo en claves como "costes_x1.5_ic90" (punto y cifra).
+    for part in re.split(r"\.(?!\d)", path):
         node = node[part[:-2]][0] if part.endswith("[]") else node[part]
     return node
 
@@ -239,6 +326,21 @@ def test_the_remaining_pages_match_what_the_android_app_reads(client: TestClient
     assert _check(client.get("/api/reportes").json(), REPORTES) == []
 
 
+def test_the_laboratory_matches_what_the_android_app_reads(tmp_path: Path) -> None:
+    """Contra los resultados reales de la F4 (research/results está en el repositorio)."""
+    client = client_for(REPO_ROOT, app_state=tmp_path)
+    assert _check(client.get("/api/laboratorio").json(), LABORATORIO) == []
+    assert _check(client.get("/api/laboratorio/H2-v1").json(), LABORATORIO_DETALLE) == []
+
+
+def test_the_market_matches_what_the_android_app_reads(client: TestClient) -> None:
+    assert _check(client.get("/api/mercado/simbolos").json(), MERCADO_SIMBOLOS) == []
+    query = "?simbolo=BTCUSDT&intervalo=4h&dias=30"
+    assert _check(client.get(f"/api/mercado/velas{query}").json(), MERCADO_VELAS) == []
+    assert _check(client.get("/api/mercado/regimenes").json(), MERCADO_REGIMENES) == []
+    assert _check(client.get("/api/mercado/correlaciones").json(), MERCADO_CORRELACIONES) == []
+
+
 def test_the_calculator_matches_what_the_android_app_reads(client: TestClient) -> None:
     approved = client.get("/api/riesgo/calculadora", params={**CALC_QUERY, "stop": "58800"}).json()
     vetoed = client.get("/api/riesgo/calculadora", params={**CALC_QUERY, "stop": "61000"}).json()
@@ -259,6 +361,12 @@ def test_the_apps_sample_responses_still_satisfy_the_contract() -> None:
         "diario": DIARIO,
         "proyecto": PROYECTO,
         "reportes": REPORTES,
+        "laboratorio": LABORATORIO,
+        "laboratorio-h2": LABORATORIO_DETALLE,
+        "mercado-simbolos": MERCADO_SIMBOLOS,
+        "mercado-velas": MERCADO_VELAS,
+        "mercado-regimenes": MERCADO_REGIMENES,
+        "mercado-correlaciones": MERCADO_CORRELACIONES,
         "calculadora-aprobada": CALCULADORA_APROBADA,
         "calculadora-vetada": CALCULADORA_VETADA,
     }

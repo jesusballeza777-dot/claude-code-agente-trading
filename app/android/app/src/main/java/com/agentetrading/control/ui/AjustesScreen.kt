@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -25,6 +26,7 @@ fun AjustesScreen(env: Env) {
             Text("Servidor: ${env.baseUrl}", style = MaterialTheme.typography.bodyMedium)
             Text("Versión ${BuildConfig.VERSION_NAME}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Button(onClick = env.onOpenSettings, modifier = Modifier.fillMaxWidth()) { Text("Servidor, bloqueo y privacidad") }
+            OutlinedButton(onClick = env.onOpenWeb, modifier = Modifier.fillMaxWidth()) { Text("Abrir el Centro de Mando web") }
         }
         InfoCard("Notificaciones", subtitle = "Llegan con la F6 (alertas por Telegram o por la app, sin datos sensibles).") {
             Text("Aún no hay notificaciones que configurar.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
