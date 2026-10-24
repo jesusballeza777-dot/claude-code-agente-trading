@@ -272,3 +272,40 @@ def test_spa_is_served_with_fallback(tmp_path: Path) -> None:
 
 def test_zip_magic_of_xlsx(client: TestClient) -> None:
     assert zipfile.is_zipfile(io.BytesIO(_get(client, "mensual", "xlsx")))
+
+
+def test_live_pulse_is_honest_about_what_is_running(client: TestClient) -> None:
+    before = client.get("/api/en-vivo").json()
+    states = {m["id"]: m["estado"] for m in before["motores"]}
+    assert states["api"] == "activo"
+    assert states["riesgo"] == "activo"
+    assert states["datos"] == "activo"
+    # Lo que aún no existe no se presenta como activo.
+    assert states["exchanges"] == "no conectado"
+    assert states["analista"] == states["sombra"] == "no iniciado"
+    assert states["ejecucion"] == "apagada"
+    assert before["live_trading"] is False
+    assert before["decisiones"]["origen"] == "demo"
+    assert before["hora_utc"].endswith("Z")
+    client.post(
+        "/api/diario/notas",
+        json={"referencia": "", "texto": "mirando el pulso"},
+        headers={"X-Brujula": "1"},
+    )
+    after = client.get("/api/en-vivo").json()
+    assert after["total_eventos"] == before["total_eventos"] + 1
+    assert after["eventos"][0]["tipo"] == "nota"
+    assert "mirando el pulso" in after["eventos"][0]["texto"]
+
+
+def test_live_without_data_says_so(tmp_path: Path) -> None:
+    client = client_for(build_repo(tmp_path, with_data=False))
+    states = {m["id"]: m["estado"] for m in client.get("/api/en-vivo").json()["motores"]}
+    assert states["datos"] == "sin datos"
+
+
+def test_live_lists_generated_reports(client: TestClient) -> None:
+    assert client.get("/api/reportes/contador/csv").status_code == 200
+    events = client.get("/api/en-vivo").json()["eventos"]
+    assert events[0]["tipo"] == "reporte"
+    assert events[0]["texto"].startswith("Reporte generado: contador-")

@@ -55,6 +55,34 @@ test("proyecto: la matriz de riesgos ubica cada riesgo del registro", async ({ p
   await expect(matrix).toContainText("Fuera de la matriz: R06");
 });
 
+test("en vivo: el pulso dice qué existe y qué no, sin simular actividad", async ({ page }) => {
+  await page.goto("/en-vivo");
+  await settle(page);
+  await expect(page.getByTestId("pulso")).toContainText("piezas activas");
+  const motores = page.getByTestId("motores");
+  await expect(motores).toContainText("Analista Claude");
+  await expect(motores.getByText("no iniciado").first()).toBeVisible();
+  await expect(motores).toContainText("Binance e Hyperliquid");
+  await expect(motores.getByText("no conectado")).toBeVisible();
+  await expect(page.getByTestId("decisiones-en-vivo")).toContainText("DATOS DE DEMOSTRACIÓN");
+});
+
+test("celular: barra inferior con pestañas y acceso a todo lo demás", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await settle(page);
+  const bar = page.getByRole("navigation", { name: "Secciones (móvil)" });
+  await expect(bar).toBeVisible();
+  await bar.getByRole("link", { name: "En vivo" }).click();
+  await expect(page).toHaveURL(/\/en-vivo$/);
+  await bar.getByRole("button", { name: "Más secciones" }).click();
+  await page.getByRole("dialog").getByRole("link", { name: "Reportes" }).click();
+  await expect(page).toHaveURL(/\/reportes$/);
+  // Sin desplazamiento horizontal de la página.
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+});
+
 test("diario: se guarda una nota (la única escritura de la app)", async ({ page }) => {
   await page.goto("/diario");
   await settle(page);

@@ -1,5 +1,7 @@
+import * as Dialog from "@radix-ui/react-dialog";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Activity,
   BookMarked,
   CandlestickChart,
   ClipboardList,
@@ -8,13 +10,16 @@ import {
   Gauge,
   Home,
   Map,
+  Menu,
   Moon,
   Palette,
   Power,
   Settings,
   ShieldCheck,
   Sun,
+  X,
 } from "lucide-react";
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router";
 import { api, type Estado } from "../lib/api";
 import { usePrefs } from "../lib/prefs";
@@ -24,6 +29,7 @@ import { Switch, cx } from "./ui";
 
 export const NAV = [
   { to: "/", label: "Hoy", icon: Home },
+  { to: "/en-vivo", label: "En vivo", icon: Activity },
   { to: "/mercado", label: "Mercado", icon: CandlestickChart },
   { to: "/laboratorio", label: "Laboratorio", icon: FlaskConical },
   { to: "/decisiones", label: "Decisiones", icon: ClipboardList },
@@ -50,11 +56,80 @@ function LiveTradingPill({ estado }: { estado?: Estado }) {
   );
 }
 
+/** Pestañas de la barra inferior del celular; el resto de páginas está en "Más". */
+const TABS = [NAV[0], NAV[1], NAV[3], NAV[5]] as const;
+const MORE = NAV.filter((n) => !TABS.some((t) => t.to === n.to));
+
+function BottomBar() {
+  const [open, setOpen] = useState(false);
+  const item = "flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] font-medium transition";
+  return (
+    <nav
+      aria-label="Secciones (móvil)"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 px-2 pt-1 backdrop-blur lg:hidden"
+      style={{ paddingBottom: "max(0.25rem, env(safe-area-inset-bottom))" }}
+    >
+      <div className="mx-auto flex max-w-lg items-stretch">
+        {TABS.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === "/"}
+            className={({ isActive }) => cx(item, isActive ? "bg-accent-soft text-accent" : "text-ink-muted")}
+          >
+            <Icon aria-hidden size={21} />
+            {label}
+          </NavLink>
+        ))}
+        <Dialog.Root open={open} onOpenChange={setOpen}>
+          <Dialog.Trigger className={cx(item, "text-ink-muted")} aria-label="Más secciones">
+            <Menu aria-hidden size={21} />
+            Más
+          </Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
+            <Dialog.Content
+              className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-line bg-surface p-4 text-ink shadow-card"
+              style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <Dialog.Title className="text-base font-semibold">Más secciones</Dialog.Title>
+                <Dialog.Close className="rounded-lg p-1.5 text-ink-muted hover:bg-surface-2" aria-label="Cerrar">
+                  <X aria-hidden size={18} />
+                </Dialog.Close>
+              </div>
+              <Dialog.Description className="sr-only">Resto de páginas del Centro de Mando</Dialog.Description>
+              <div className="grid grid-cols-3 gap-2">
+                {[...MORE, { to: "/estilo", label: "Diseño", icon: Palette }].map(({ to, label, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      cx(
+                        "flex flex-col items-center gap-1.5 rounded-2xl border border-line px-2 py-3 text-xs font-medium",
+                        isActive ? "bg-accent-soft text-accent" : "bg-surface-2 text-ink",
+                      )
+                    }
+                  >
+                    <Icon aria-hidden size={22} />
+                    {label}
+                  </NavLink>
+                ))}
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      </div>
+    </nav>
+  );
+}
+
 export function Layout() {
   const { theme, setTheme, explain, setExplain } = usePrefs();
   const { data: estado } = useQuery({ queryKey: ["estado"], queryFn: () => api.get<Estado>("/api/estado") });
 
-  const links = (compact: boolean) =>
+  const links = () =>
     NAV.map(({ to, label, icon: Icon }) => (
       <NavLink
         key={to}
@@ -63,7 +138,6 @@ export function Layout() {
         className={({ isActive }) =>
           cx(
             "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition",
-            compact && "shrink-0",
             isActive ? "bg-accent-soft text-accent" : "text-ink-muted hover:bg-surface-2 hover:text-ink",
           )
         }
@@ -88,7 +162,7 @@ export function Layout() {
             </div>
           </div>
           <nav aria-label="Secciones" className="flex flex-1 flex-col gap-1">
-            {links(false)}
+            {links()}
           </nav>
           <div className="space-y-2 border-t border-line px-2 pt-3 text-xs text-ink-muted">
             <LiveTradingPill estado={estado} />
@@ -128,17 +202,15 @@ export function Layout() {
               </button>
             </div>
           </div>
-          <nav aria-label="Secciones (móvil)" className="flex gap-1 overflow-x-auto px-3 pb-2 lg:hidden">
-            {links(true)}
-          </nav>
         </header>
-        <main id="contenido" className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-7">
+        <main id="contenido" className="mx-auto max-w-7xl px-4 pb-28 pt-5 sm:px-6 sm:pt-7 lg:pb-7">
           <Outlet />
         </main>
-        <footer className="px-6 pb-6 text-xs text-ink-muted">
+        <footer className="px-6 pb-24 text-xs text-ink-muted lg:pb-6">
           No es asesoría financiera, legal ni fiscal. La rentabilidad es una hipótesis que el sistema tiene que demostrar.
         </footer>
       </div>
+      <BottomBar />
       <Onboarding />
     </div>
   );

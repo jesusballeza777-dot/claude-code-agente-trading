@@ -302,3 +302,17 @@ export interface Glosario {
   terminos: Record<string, string>;
   vacios: Record<string, string>;
 }
+
+export interface EnVivo {
+  origen: Origen;
+  hora_utc: string;
+  live_trading: boolean;
+  motores: { id: string; nombre: string; estado: string; detalle: string }[];
+  eventos: { t: string; tipo: "nota" | "reporte"; texto: string }[];
+  total_eventos: number;
+  decisiones: {
+    origen: Origen;
+    aviso: string;
+    items: { t: string; accion: string; nivel: string; motivo: string; veto: string | null }[];
+  };
+}

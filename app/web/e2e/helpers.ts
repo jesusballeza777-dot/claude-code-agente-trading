@@ -3,6 +3,7 @@ import { expect, type Page } from "@playwright/test";
 
 export const PAGES = [
   ["hoy", "/"],
+  ["en-vivo", "/en-vivo"],
   ["mercado", "/mercado"],
   ["laboratorio", "/laboratorio"],
   ["decisiones", "/decisiones"],

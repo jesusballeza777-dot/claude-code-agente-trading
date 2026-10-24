@@ -8,6 +8,7 @@ import { api } from "./lib/api";
 
 // Cada página se carga al visitarla: el primer pintado no espera a las librerías de gráficas.
 const Hoy = lazy(() => import("./pages/Hoy").then((m) => ({ default: m.Hoy })));
+const EnVivo = lazy(() => import("./pages/EnVivo").then((m) => ({ default: m.EnVivo })));
 const Mercado = lazy(() => import("./pages/Mercado").then((m) => ({ default: m.Mercado })));
 const Laboratorio = lazy(() => import("./pages/Laboratorio").then((m) => ({ default: m.Laboratorio })));
 const Riesgo = lazy(() => import("./pages/Riesgo").then((m) => ({ default: m.Riesgo })));
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: page(<Hoy />) },
+      { path: "en-vivo", element: page(<EnVivo />) },
       { path: "mercado", element: page(<Mercado />) },
       { path: "laboratorio", element: page(<Laboratorio />) },
       { path: "decisiones", element: page(<Decisiones />) },

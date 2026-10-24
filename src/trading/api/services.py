@@ -652,6 +652,102 @@ class Services:
             "notas": self.notes(),
         }
 
+    def live(self, *, now: datetime | None = None) -> dict[str, Any]:
+        """Pulso del sistema para la vista En vivo: qué piezas trabajan, cuáles aún no y qué pasó.
+
+        Solo lo que existe es "activo". Las piezas que llegan en fases posteriores salen como
+        "no iniciado" (nunca se simula actividad real). Las decisiones del analista son de
+        demostración hasta la F5 y van rotuladas aparte.
+        """
+        moment = (now or datetime.now(UTC)).astimezone(UTC)
+        status = self.status()
+        data = status["datos"]
+        engines = [
+            {
+                "id": "api",
+                "nombre": "Centro de Mando",
+                "estado": "activo",
+                "detalle": "API de solo lectura respondiendo",
+            },
+            {
+                "id": "datos",
+                "nombre": "Datos públicos de Binance",
+                "estado": "activo" if data["disponible"] else "sin datos",
+                "detalle": f"última vela {data['ultima_vela']} (periodo de investigación)"
+                if data["disponible"]
+                else "sin descargar: ejecuta trading.data.f3",
+            },
+            {
+                "id": "riesgo",
+                "nombre": "Motor de riesgo",
+                "estado": "activo",
+                "detalle": "límites "
+                f"{status['motor_de_riesgo']['version_limites']} con veto absoluto",
+            },
+            {
+                "id": "exchanges",
+                "nombre": "Binance e Hyperliquid",
+                "estado": "no conectado",
+                "detalle": "sin claves: llega con la F1 y la F6",
+            },
+            {
+                "id": "analista",
+                "nombre": "Analista Claude",
+                "estado": "no iniciado",
+                "detalle": "empieza en la F5",
+            },
+            {
+                "id": "sombra",
+                "nombre": "Simulación en sombra",
+                "estado": "no iniciado",
+                "detalle": "empieza en la F7 (≥12 semanas)",
+            },
+            {
+                "id": "ejecucion",
+                "nombre": "Ejecución real",
+                "estado": "apagada",
+                "detalle": "LIVE_TRADING apagado"
+                if not status["live_trading"]
+                else "ENCENDIDO: revisa de inmediato",
+            },
+        ]
+        events: list[dict[str, str]] = []
+        for note in self.notes():
+            events.append(
+                {
+                    "t": note["fecha_utc"],
+                    "tipo": "nota",
+                    "texto": f"Nota en el diario: {note['texto'][:140]}",
+                }
+            )
+        history = self.state / "reportes.jsonl"
+        if history.exists():
+            for line in history.read_text("utf-8").splitlines():
+                if line.strip():
+                    entry = json.loads(line)
+                    events.append(
+                        {
+                            "t": entry["fecha_utc"],
+                            "tipo": "reporte",
+                            "texto": f"Reporte generado: {entry['archivo']}",
+                        }
+                    )
+        events.sort(key=lambda e: e["t"], reverse=True)
+        decisions = demo_decisions()["decisiones"][-6:][::-1]
+        return {
+            "origen": "real",
+            "hora_utc": moment.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "live_trading": status["live_trading"],
+            "motores": engines,
+            "eventos": events[:30],
+            "total_eventos": len(events),
+            "decisiones": {
+                "origen": "demo",
+                "aviso": "Ejemplos: el analista Claude empieza en la F5.",
+                "items": decisions,
+            },
+        }
+
     def notes(self) -> list[dict[str, Any]]:
         path = self.state / "notas.jsonl"
         if not path.exists():

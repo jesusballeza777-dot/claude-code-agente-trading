@@ -181,6 +181,10 @@ def create_app(settings: ApiSettings | None = None) -> FastAPI:
     def vetoes() -> dict[str, Any]:
         return services.veto_history()
 
+    @app.get("/api/en-vivo")
+    def live() -> dict[str, Any]:
+        return services.live()
+
     @app.get("/api/decisiones")
     def decisions() -> dict[str, Any]:
         return demo_decisions()
