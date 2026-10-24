@@ -1,0 +1,290 @@
+{
+ "origen": "demo",
+ "vacio": "El analista Claude empieza en la F5. Lo que ves aquí son datos de demostración para que conozcas la pantalla.",
+ "decisiones": [
+  {
+   "t": "2026-10-01T04:00:00+00:00",
+   "accion": "ABSTAIN",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "ABSTAIN",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-01T12:00:00+00:00",
+   "accion": "HOLD",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "HOLD",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-01T20:00:00+00:00",
+   "accion": "ENTER_LONG",
+   "nivel": "B",
+   "motivo": "Ejemplo: ruptura del canal con volatilidad creciente",
+   "evidencia": [
+    "H2-v1 §4",
+    "motor de riesgo"
+   ],
+   "veto": null,
+   "json": {
+    "action": "ENTER_LONG",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-02T04:00:00+00:00",
+   "accion": "EXIT",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "EXIT",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-02T12:00:00+00:00",
+   "accion": "ABSTAIN",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "ABSTAIN",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-02T20:00:00+00:00",
+   "accion": "ENTER_SHORT",
+   "nivel": "B",
+   "motivo": "Ejemplo: ruptura del canal con volatilidad creciente",
+   "evidencia": [
+    "H2-v1 §4",
+    "motor de riesgo"
+   ],
+   "veto": null,
+   "json": {
+    "action": "ENTER_SHORT",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-03T04:00:00+00:00",
+   "accion": "HOLD",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "HOLD",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-03T12:00:00+00:00",
+   "accion": "ABSTAIN",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "ABSTAIN",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-03T20:00:00+00:00",
+   "accion": "HOLD",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "HOLD",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-04T04:00:00+00:00",
+   "accion": "ENTER_LONG",
+   "nivel": "B",
+   "motivo": "Ejemplo: ruptura del canal con volatilidad creciente",
+   "evidencia": [
+    "H2-v1 §4",
+    "motor de riesgo"
+   ],
+   "veto": null,
+   "json": {
+    "action": "ENTER_LONG",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-04T12:00:00+00:00",
+   "accion": "EXIT",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "EXIT",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-04T20:00:00+00:00",
+   "accion": "ABSTAIN",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "ABSTAIN",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-05T04:00:00+00:00",
+   "accion": "ENTER_SHORT",
+   "nivel": "B",
+   "motivo": "Ejemplo: ruptura del canal con volatilidad creciente",
+   "evidencia": [
+    "H2-v1 §4",
+    "motor de riesgo"
+   ],
+   "veto": null,
+   "json": {
+    "action": "ENTER_SHORT",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-05T12:00:00+00:00",
+   "accion": "HOLD",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "HOLD",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-05T20:00:00+00:00",
+   "accion": "ABSTAIN",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "ABSTAIN",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-06T04:00:00+00:00",
+   "accion": "HOLD",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "HOLD",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-06T12:00:00+00:00",
+   "accion": "ENTER_LONG",
+   "nivel": "B",
+   "motivo": "Ejemplo: ruptura del canal con volatilidad creciente",
+   "evidencia": [
+    "H2-v1 §4",
+    "motor de riesgo"
+   ],
+   "veto": null,
+   "json": {
+    "action": "ENTER_LONG",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  },
+  {
+   "t": "2026-10-06T20:00:00+00:00",
+   "accion": "EXIT",
+   "nivel": "A",
+   "motivo": "Ejemplo: sin señal válida",
+   "evidencia": [],
+   "veto": null,
+   "json": {
+    "action": "EXIT",
+    "hypothesis": "H2-v1",
+    "symbol": "BTCUSDT",
+    "demo": true
+   }
+  }
+ ],
+ "libros": [
+  {
+   "libro": "A: regla pura",
+   "operaciones": 0,
+   "esperanza_r": null
+  },
+  {
+   "libro": "B: regla + veto de Claude",
+   "operaciones": 0,
+   "esperanza_r": null
+  },
+  {
+   "libro": "C: placebo de vetos aleatorios",
+   "operaciones": 0,
+   "esperanza_r": null
+  }
+ ]
+}

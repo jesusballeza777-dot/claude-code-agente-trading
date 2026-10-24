@@ -1,0 +1,442 @@
+{
+ "origen": "real",
+ "fases": [
+  {
+   "id": "F0",
+   "nombre": "Alcance y gobernanza",
+   "estado": "cerrada"
+  },
+  {
+   "id": "F1",
+   "nombre": "Plataforma (verificaciones del propietario)",
+   "estado": "pendiente del propietario"
+  },
+  {
+   "id": "F2",
+   "nombre": "Fundaciones: CI, motor de riesgo, auditoría",
+   "estado": "en curso"
+  },
+  {
+   "id": "F3",
+   "nombre": "Datos públicos sin claves",
+   "estado": "en curso: falta 2.ª fuente"
+  },
+  {
+   "id": "F4",
+   "nombre": "Investigación y backtests",
+   "estado": "en curso: holdout sellado"
+  },
+  {
+   "id": "F5",
+   "nombre": "Analista Claude",
+   "estado": "no empezada"
+  },
+  {
+   "id": "F6",
+   "nombre": "Riesgo y ejecución",
+   "estado": "no empezada"
+  },
+  {
+   "id": "F7",
+   "nombre": "Simulación en sombra (≥12 semanas)",
+   "estado": "no empezada"
+  },
+  {
+   "id": "F8",
+   "nombre": "Piloto real con USD 1,500",
+   "estado": "no empezada"
+  },
+  {
+   "id": "F9",
+   "nombre": "Escala",
+   "estado": "no empezada"
+  }
+ ],
+ "adr": [
+  {
+   "id": "001",
+   "titulo": "Mercado: spot + perpetuos USDⓈ-M",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "002",
+   "titulo": "Plataforma: Binance, Kraken como contingencia, Bitso como rampa MXN",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "003",
+   "titulo": "Modelos de Claude: versión fijada y rol",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "004",
+   "titulo": "Horizonte: velas de 4h y 1d",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "005",
+   "titulo": "Numeración de fases F0-F9",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "006",
+   "titulo": "Aprobación por niveles A/B",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "007",
+   "titulo": "Motor de riesgo v0: diseño e interpretación de los límites",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "008",
+   "titulo": "Mejora continua sin topes del proyecto; aprendizaje automático como hipótesis pre-registrada",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "009",
+   "titulo": "Hyperliquid como segunda plataforma, con wallet de agente sin retiros",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "010",
+   "titulo": "App Android de control, dashboard y reportes",
+   "estado": "Aceptado; sustituido en parte por ADR-014"
+  },
+  {
+   "id": "011",
+   "titulo": "Autonomía por evidencia",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "012",
+   "titulo": "Estado de fases y arranque de la F3 con datos públicos",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "013",
+   "titulo": "Motor de riesgo v1: reglas ampliadas (exposición, alts, depeg, macro, disyuntores, liquidez, funding)",
+   "estado": "Propuesto"
+  },
+  {
+   "id": "014",
+   "titulo": "Centro de Mando web como app principal; Android como cliente ligero",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "015",
+   "titulo": "Seguridad del Centro de Mando",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "016",
+   "titulo": "Datos públicos de la F3 y almacenamiento (Parquet + TimescaleDB)",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "017",
+   "titulo": "Reportes descargables (PDF, XLSX, CSV, JSON y Parquet)",
+   "estado": "Aceptado"
+  },
+  {
+   "id": "018",
+   "titulo": "App Android como cliente nativo del Centro de Mando",
+   "estado": "Aceptado"
+  }
+ ],
+ "riesgos": [
+  {
+   "id": "R01",
+   "riesgo": "No existe ventaja neta de costes: ninguna hipótesis pasa el gate de la F4",
+   "probabilidad": "Alta",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R02",
+   "riesgo": "Sobreajuste / data snooping",
+   "probabilidad": "Alta",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R03",
+   "riesgo": "Muestra insuficiente (<200 operaciones fuera de muestra), sobre todo en H1 (solo BTC, 1d)",
+   "probabilidad": "Media",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R04",
+   "riesgo": "Cambio de régimen: la ventaja desaparece después de validarse",
+   "probabilidad": "Media",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R05",
+   "riesgo": "Contaminación del holdout",
+   "probabilidad": "Baja",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R06",
+   "riesgo": "Datos históricos de OI insuficientes para H4",
+   "probabilidad": "Ocurrido",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R07",
+   "riesgo": "Muestra de nivel A insuficiente: ningún setup llega a ≥100 casos calibrados",
+   "probabilidad": "Alta",
+   "impacto": "Bajo"
+  },
+  {
+   "id": "R08",
+   "riesgo": "Órdenes por debajo del nocional mínimo: con USD 7.50 de riesgo y stops anchos, la orden no llega al mínimo del contrato (≈100 USDT en BTC)",
+   "probabilidad": "Media",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R10",
+   "riesgo": "Gap o crash que salta el stop (12-mar-2020: BTC cerca de −40% en un día)",
+   "probabilidad": "Media",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R11",
+   "riesgo": "Liquidación de una posición",
+   "probabilidad": "Baja",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R12",
+   "riesgo": "Funding erosiona la ventaja",
+   "probabilidad": "Media",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R13",
+   "riesgo": "Correlación BTC-ETH (≈0.8) duplica la exposición; las alts también se mueven con BTC",
+   "probabilidad": "Alta",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R14",
+   "riesgo": "Slippage de stops en mercados rápidos y ADL",
+   "probabilidad": "Media",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R15",
+   "riesgo": "Depeg de USDC (capital en USDC; en mar-2023 cotizó cerca de 0.88)",
+   "probabilidad": "Baja",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R20",
+   "riesgo": "Futuros USDⓈ-M no disponibles para la cuenta en México",
+   "probabilidad": "Media",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R21",
+   "riesgo": "Riesgo de contraparte o regulatorio de Binance",
+   "probabilidad": "Baja",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R22",
+   "riesgo": "Tratamiento fiscal de derivados distinto al spot",
+   "probabilidad": "Media",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R23",
+   "riesgo": "Caída del exchange o de la API durante una posición abierta",
+   "probabilidad": "Media",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R24",
+   "riesgo": "Riesgo propio de Hyperliquid: contrato inteligente, puente, oráculo o restricción para México",
+   "probabilidad": "Media",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R30",
+   "riesgo": "El modelo inventa números o probabilidades",
+   "probabilidad": "Media",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R31",
+   "riesgo": "Inyección de instrucciones desde noticias, webs o APIs",
+   "probabilidad": "Media",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R32",
+   "riesgo": "Cambio o retirada del modelo altera el comportamiento del analista",
+   "probabilidad": "Media",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R33",
+   "riesgo": "Fuga de claves API",
+   "probabilidad": "Baja",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R34",
+   "riesgo": "Activación accidental de ejecución real",
+   "probabilidad": "Baja",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R35",
+   "riesgo": "Error en el motor de riesgo deja pasar una operación fuera de límites",
+   "probabilidad": "Baja",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R36",
+   "riesgo": "Autoejecución de nivel A errónea",
+   "probabilidad": "Baja",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R37",
+   "riesgo": "Datos atrasados o feed caído generan señales con precios viejos",
+   "probabilidad": "Media",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R38",
+   "riesgo": "Teléfono perdido o comprometido",
+   "probabilidad": "Media",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R39",
+   "riesgo": "Frase semilla o clave privada de MetaMask expuesta en el sistema, el chat o el repositorio",
+   "probabilidad": "Baja",
+   "impacto": "Alto"
+  },
+  {
+   "id": "R40",
+   "riesgo": "Sobrecoste operativo: ≈USD 110-117/mes (docs/presupuesto.md) ≈ 7.5% mensual del capital, sin tope de gasto (ADR-008)",
+   "probabilidad": "Alta",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R41",
+   "riesgo": "Retraso de calendario con 20 h/semana, sin tope de calendario (ADR-008)",
+   "probabilidad": "Media",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R42",
+   "riesgo": "Coste de la API del analista por encima de los créditos de Max (USD 100/mes) o créditos sin reclamar",
+   "probabilidad": "Baja",
+   "impacto": "Bajo"
+  },
+  {
+   "id": "R43",
+   "riesgo": "Disponibilidad del propietario para el nivel B (señales de 4h de madrugada en México)",
+   "probabilidad": "Alta",
+   "impacto": "Medio"
+  },
+  {
+   "id": "R44",
+   "riesgo": "Iterar hasta que algo \"funcione\": sin topes, la tentación de probar variantes sin fin produce sobreajuste",
+   "probabilidad": "Alta",
+   "impacto": "Alto"
+  }
+ ],
+ "pendientes_propietario": [
+  {
+   "tarea": "Verificar en Binance que tu cuenta permite futuros USDⓈ-M, comisiones y nocional mínimo",
+   "documento": "docs/f1-verificacion-plataforma.md"
+  },
+  {
+   "tarea": "Generar tu clave age y compartir solo la pública para SOPS",
+   "documento": "ops/secrets.md"
+  },
+  {
+   "tarea": "Aprobar o ajustar el ADR-013 (reglas de riesgo más restrictivas)",
+   "documento": "docs/adr/013-motor-de-riesgo-v1-reglas-ampliadas.md"
+  },
+  {
+   "tarea": "Reclamar los créditos de API de Max 5x en la consola",
+   "documento": "docs/presupuesto.md"
+  },
+  {
+   "tarea": "Revisar los resultados de la F4 y decidir los siguientes pre-registros",
+   "documento": "docs/resultados/f4-analisis.md"
+  },
+  {
+   "tarea": "Validar el formato del reporte fiscal con tu contador",
+   "documento": "docs/app/especificacion.md"
+  },
+  {
+   "tarea": "Cuando haya VPS: crear las credenciales del Centro de Mando en tu ordenador",
+   "documento": "README.md"
+  }
+ ],
+ "costes": {
+  "conceptos": [
+   {
+    "concepto": "Claude Max 5x",
+    "usd_mes": "100",
+    "estado": "estimado (precio del plan §6)"
+   },
+   {
+    "concepto": "API de Claude para el analista",
+    "usd_mes": "0 dentro de los créditos",
+    "estado": "confirmado que Max 5x incluye USD 100/mes en créditos de API (centro de ayuda de Claude)"
+   },
+   {
+    "concepto": "VPS en la UE y copias de seguridad",
+    "usd_mes": "10-17",
+    "estado": "estimado"
+   },
+   {
+    "concepto": "Datos de mercado (archivo y API pública de Binance)",
+    "usd_mes": "0",
+    "estado": "confirmado"
+   },
+   {
+    "concepto": "Hyperliquid",
+    "usd_mes": "0",
+    "estado": "confirmado"
+   },
+   {
+    "concepto": "Tailscale (acceso al Centro de Mando)",
+    "usd_mes": "0",
+    "estado": "por verificar"
+   },
+   {
+    "concepto": "GitHub Actions",
+    "usd_mes": "0",
+    "estado": "por verificar"
+   },
+   {
+    "concepto": "Total",
+    "usd_mes": "≈110-117",
+    "estado": "estimado"
+   }
+  ],
+  "tipo_de_cambio": {
+   "mxn_por_usd": "18.70",
+   "estado": "por verificar (FIX de Banxico)"
+  },
+  "uso_api_claude": {
+   "origen": "demo",
+   "nota": "El analista Claude empieza en la F5; el uso real de la API se mostrará aquí.",
+   "meses": [
+    {
+     "mes": "2026-10",
+     "tokens": 0,
+     "usd": "0.00"
+    }
+   ]
+  }
+ }
+}

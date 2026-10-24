@@ -1,0 +1,18 @@
+{
+ "origen": "backtest",
+ "nota": "Vetos de las corridas principales de la F4. El historial con 'qué habría pasado' llega con la sombra (F7).",
+ "vetos": [
+  {
+   "codigo": "RISK_PER_TRADE",
+   "titulo": "Riesgo por operación",
+   "explicacion": "Esta operación arriesgaría más que tu límite por operación.",
+   "veces": 4
+  },
+  {
+   "codigo": "BELOW_MIN_NOTIONAL",
+   "titulo": "Orden demasiado pequeña",
+   "explicacion": "La orden no llega al mínimo del contrato; el tamaño nunca se aumenta para llegar.",
+   "veces": 2
+  }
+ ]
+}

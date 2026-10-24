@@ -34,9 +34,14 @@ class ApiClient(private val baseUrl: String, private val timeoutMs: Int = 8_000)
     var sessionCookie: String? = null
         private set
 
-    fun get(path: String): Result =
+    fun get(path: String): Result = call("GET", path, null)
+
+    /** Única escritura de la API además de la sesión: las notas del diario. Lleva la cabecera anti-CSRF. */
+    fun post(path: String, body: JSONObject): Result = call("POST", path, body.toString())
+
+    private fun call(method: String, path: String, body: String?): Result =
         try {
-            val raw = send("GET", path, null)
+            val raw = send(method, path, body)
             when (raw.code) {
                 200 ->
                     try {
@@ -48,10 +53,20 @@ class ApiClient(private val baseUrl: String, private val timeoutMs: Int = 8_000)
                     sessionCookie = null
                     Result.NeedsLogin
                 }
+                // 4xx con explicación: la API dice qué está mal en `detail` o `detalle`.
+                in 400..499 -> Result.Failed(detail(raw.body) ?: "El servidor respondió con el código ${raw.code}.")
                 else -> Result.Failed("El servidor respondió con el código ${raw.code}.")
             }
         } catch (e: IOException) {
             Result.Failed("Sin conexión con el servidor: ${e.message ?: "sin respuesta"}.")
+        }
+
+    private fun detail(body: String): String? =
+        try {
+            val json = JSONObject(body)
+            (json.opt("detail") ?: json.opt("detalle")) as? String
+        } catch (_: JSONException) {
+            null
         }
 
     fun login(password: String, totp: String): LoginResult =

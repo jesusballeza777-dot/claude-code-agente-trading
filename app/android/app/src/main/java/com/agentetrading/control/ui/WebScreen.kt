@@ -1,13 +1,10 @@
 package com.agentetrading.control.ui
 
 import android.annotation.SuppressLint
-import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.net.http.SslError
-import android.os.Environment
-import android.webkit.CookieManager
 import android.webkit.SslErrorHandler
 import android.webkit.URLUtil
 import android.webkit.WebChromeClient
@@ -123,7 +120,7 @@ fun WebScreen(baseUrl: String, lifecycle: Lifecycle, path: String, onOpenSetting
                 }
             web.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
                 if (NavigationPolicy.decide(baseUrl, url) == NavigationPolicy.Decision.STAY) {
-                    download(context, url, userAgent, contentDisposition, mimeType)
+                    downloadFile(context, url, URLUtil.guessFileName(url, contentDisposition, mimeType), mimeType, userAgent)
                 }
             }
             refresh.setColorSchemeColors(ACCENT)
@@ -211,26 +208,5 @@ private fun openInBrowser(context: Context, uri: Uri) {
         context.startActivity(Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     } catch (_: android.content.ActivityNotFoundException) {
         Toast.makeText(context, "No hay un navegador para abrir el enlace.", Toast.LENGTH_SHORT).show()
-    }
-}
-
-/** Los reportes (PDF, Excel, CSV) se guardan en Descargas con la sesión de la app. */
-private fun download(context: Context, url: String, userAgent: String, contentDisposition: String?, mimeType: String?) {
-    val name = URLUtil.guessFileName(url, contentDisposition, mimeType)
-    try {
-        val request =
-            DownloadManager.Request(Uri.parse(url))
-                .setTitle(name)
-                .addRequestHeader("User-Agent", userAgent)
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name)
-        mimeType?.let { request.setMimeType(it) }
-        CookieManager.getInstance().getCookie(url)?.let { request.addRequestHeader("Cookie", it) }
-        (context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
-        Toast.makeText(context, "Descargando $name…", Toast.LENGTH_SHORT).show()
-    } catch (_: SecurityException) {
-        Toast.makeText(context, "No se pudo guardar el archivo en Descargas.", Toast.LENGTH_LONG).show()
-    } catch (_: IllegalArgumentException) {
-        Toast.makeText(context, "No se pudo descargar el archivo.", Toast.LENGTH_LONG).show()
     }
 }

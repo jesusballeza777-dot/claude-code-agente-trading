@@ -1,0 +1,16 @@
+{
+ "origen": "real",
+ "motor": "evaluate_entry con los límites F7-F8 firmados",
+ "aprobada": true,
+ "cantidad": "0.005686988171064604185623293903548680",
+ "nocional": "341.2192902638762511373976342129208",
+ "riesgo_usd": "7.499999999999999999999999999999999",
+ "presupuesto_usd": "7.500",
+ "apalancamiento_efectivo": "0.2274795268425841674249317561419472",
+ "precio_liquidacion": "40160.64257028112449799196787148595",
+ "costes": {
+  "comision": "0.0005",
+  "slippage": "0.0005"
+ },
+ "vetos": []
+}

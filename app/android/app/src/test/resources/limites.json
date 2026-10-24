@@ -1,0 +1,86 @@
+{
+ "origen": "real",
+ "editable": false,
+ "aviso": "Los límites no se editan desde la app: solo cambian con un ADR aprobado por ti.",
+ "vigentes": [
+  {
+   "nombre": "Riesgo por operación",
+   "valor": "0.005",
+   "techo_plan": "0.01",
+   "unidad": "fracción",
+   "adr": "ADR-007"
+  },
+  {
+   "nombre": "Apalancamiento efectivo",
+   "valor": "2",
+   "techo_plan": "3",
+   "unidad": "veces",
+   "adr": "ADR-007"
+  },
+  {
+   "nombre": "Liquidación / distancia al stop (mínimo)",
+   "valor": "3",
+   "techo_plan": "3",
+   "unidad": "veces",
+   "adr": "ADR-007"
+  },
+  {
+   "nombre": "Pérdida diaria",
+   "valor": "0.02",
+   "techo_plan": "0.02",
+   "unidad": "fracción",
+   "adr": "ADR-007"
+  },
+  {
+   "nombre": "Pérdida semanal",
+   "valor": "0.04",
+   "techo_plan": "0.05",
+   "unidad": "fracción",
+   "adr": "ADR-007"
+  },
+  {
+   "nombre": "Drawdown: parada",
+   "valor": "0.15",
+   "techo_plan": "0.20",
+   "unidad": "fracción",
+   "adr": "ADR-007"
+  },
+  {
+   "nombre": "Drawdown: corte duro",
+   "valor": "0.20",
+   "techo_plan": "0.20",
+   "unidad": "fracción",
+   "adr": "ADR-007"
+  }
+ ],
+ "grupos_correlacionados": [
+  [
+   "BTC",
+   "ETH"
+  ]
+ ],
+ "propuestos_adr_013": {
+  "max_beta_adjusted_exposure": "1.00",
+  "max_notional_per_alt": "0.10",
+  "max_notional_all_alts": "0.25",
+  "max_open_positions": 4,
+  "core_assets": [
+   "BTC",
+   "ETH"
+  ],
+  "monitored_stablecoins": [
+   "USDC",
+   "USDT"
+  ],
+  "max_stablecoin_deviation": "0.005",
+  "macro_blackout": "120 min",
+  "max_api_errors": 3,
+  "api_error_window": "10 min",
+  "max_spread_bps_core": "5",
+  "max_spread_bps_alt": "10",
+  "depth_band_bps_core": "5",
+  "depth_band_bps_alt": "10",
+  "min_depth_multiple": "10",
+  "max_adverse_funding_8h": "0.0010"
+ }
+}

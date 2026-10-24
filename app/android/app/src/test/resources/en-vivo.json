@@ -1,6 +1,6 @@
 {
  "origen": "real",
- "hora_utc": "2026-10-24T03:02:34Z",
+ "hora_utc": "2026-10-24T03:26:25Z",
  "live_trading": false,
  "motores": [
   {
@@ -46,8 +46,19 @@
    "detalle": "LIVE_TRADING apagado"
   }
  ],
- "eventos": [],
- "total_eventos": 0,
+ "eventos": [
+  {
+   "t": "2026-10-24T03:26:25Z",
+   "tipo": "nota",
+   "texto": "Nota en el diario: Revisé el PBO: sigue en 0.456."
+  },
+  {
+   "t": "2026-10-24T03:26:25Z",
+   "tipo": "reporte",
+   "texto": "Reporte generado: contador-20261024-0326-DEMO.csv"
+  }
+ ],
+ "total_eventos": 2,
  "decisiones": {
   "origen": "demo",
   "aviso": "Ejemplos: el analista Claude empieza en la F5.",

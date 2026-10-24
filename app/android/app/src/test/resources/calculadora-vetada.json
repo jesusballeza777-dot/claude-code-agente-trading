@@ -1,0 +1,22 @@
+{
+ "origen": "real",
+ "motor": "evaluate_entry con los límites F7-F8 firmados",
+ "aprobada": false,
+ "cantidad": "0.006690454950936663693131132917038358",
+ "nocional": "401.4272970561998215878679750223015",
+ "riesgo_usd": null,
+ "presupuesto_usd": "7.500",
+ "apalancamiento_efectivo": null,
+ "precio_liquidacion": null,
+ "costes": {
+  "comision": "0.0005",
+  "slippage": "0.0005"
+ },
+ "vetos": [
+  {
+   "code": "INVALID_STOP",
+   "title": "Stop mal colocado",
+   "message": "El stop está del lado equivocado del precio de entrada: no protegería la operación."
+  }
+ ]
+}

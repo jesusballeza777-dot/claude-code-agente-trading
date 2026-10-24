@@ -1,0 +1,75 @@
+{
+ "origen": "real",
+ "reportes": [
+  {
+   "tipo": "semanal",
+   "formato": "pdf",
+   "nombre": "Reporte semanal",
+   "mime": "application/pdf"
+  },
+  {
+   "tipo": "mensual",
+   "formato": "pdf",
+   "nombre": "Reporte mensual",
+   "mime": "application/pdf"
+  },
+  {
+   "tipo": "mensual",
+   "formato": "xlsx",
+   "nombre": "Reporte mensual",
+   "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  },
+  {
+   "tipo": "ficha",
+   "formato": "pdf",
+   "nombre": "Ficha de estrategia",
+   "mime": "application/pdf"
+  },
+  {
+   "tipo": "contador",
+   "formato": "xlsx",
+   "nombre": "Reporte para el contador",
+   "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  },
+  {
+   "tipo": "contador",
+   "formato": "csv",
+   "nombre": "Reporte para el contador",
+   "mime": "text/csv"
+  },
+  {
+   "tipo": "auditoria",
+   "formato": "json",
+   "nombre": "Auditoría",
+   "mime": "application/json"
+  },
+  {
+   "tipo": "auditoria",
+   "formato": "csv",
+   "nombre": "Auditoría",
+   "mime": "text/csv"
+  },
+  {
+   "tipo": "datos",
+   "formato": "csv",
+   "nombre": "Datos",
+   "mime": "text/csv"
+  },
+  {
+   "tipo": "datos",
+   "formato": "parquet",
+   "nombre": "Datos",
+   "mime": "application/vnd.apache.parquet"
+  }
+ ],
+ "historial": [
+  {
+   "fecha_utc": "2026-10-24T03:26:25Z",
+   "tipo": "contador",
+   "formato": "csv",
+   "archivo": "contador-20261024-0326-DEMO.csv",
+   "demo": true,
+   "sha256": "1e21d41bc0e6d00d87ba65b805b6899aba6ea7a4c258ac91facc721d0b991a11"
+  }
+ ]
+}

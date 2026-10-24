@@ -26,6 +26,10 @@ class ApiClientTest {
                 }
                 "/api/roto" -> MiniServer.Response(200, "esto no es json")
                 "/api/caido" -> MiniServer.Response(502)
+                "/api/invalido" -> MiniServer.Response(422, """{"detail":"los importes deben ser números"}""")
+                "/api/lista" -> MiniServer.Response(422, """{"detail":[{"msg":"mal"}]}""")
+                "/api/notas" ->
+                    if (request.method == "POST") MiniServer.Response(200, """{"id":"n1"}""") else MiniServer.Response(405)
                 "/api/sesion" ->
                     if (loginStatus == 200) {
                         MiniServer.Response(200, """{"activa":true}""", listOf("Set-Cookie" to "brujula_sesion=abc123; HttpOnly; Path=/; SameSite=strict"))
@@ -98,5 +102,25 @@ class ApiClientTest {
         closed.close()
         val result = ApiClient(url, timeoutMs = 1_000).get("/api/estado")
         assertTrue((result as ApiClient.Result.Failed).message.startsWith("Sin conexión"))
+    }
+
+    @Test
+    fun clientErrorsCarryTheServersExplanation() {
+        val client = ApiClient(server.baseUrl)
+        assertEquals("los importes deben ser números", (client.get("/api/invalido") as ApiClient.Result.Failed).message)
+        // Si el detalle no es un texto (lista de errores de validación) se usa el mensaje genérico.
+        assertTrue((client.get("/api/lista") as ApiClient.Result.Failed).message.contains("422"))
+    }
+
+    @Test
+    fun postSendsJsonWithTheAntiCsrfHeader() {
+        authRequired = false
+        val client = ApiClient(server.baseUrl)
+        val result = client.post("/api/notas", org.json.JSONObject().put("referencia", "H2-v1").put("texto", "hola"))
+        assertTrue(result is ApiClient.Result.Ok)
+        val sent = server.lastRequest
+        assertEquals("POST", sent?.method)
+        assertEquals("1", sent?.headers?.get("x-brujula"))
+        assertTrue(sent?.body?.contains("\"texto\":\"hola\"") == true)
     }
 }

@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Favorite
@@ -40,81 +42,97 @@ import androidx.lifecycle.Lifecycle
 import com.agentetrading.control.model.Parsers
 import com.agentetrading.control.net.ApiClient
 
-private enum class Tab(val label: String, val icon: ImageVector) {
-    HOY("Hoy", Icons.Filled.Home),
-    EN_VIVO("En vivo", Icons.Filled.Favorite),
-    LABORATORIO("Laboratorio", Icons.Filled.Build),
-    RIESGO("Riesgo", Icons.Filled.Lock),
-    MAS("Más", Icons.Filled.Menu),
+/** Todas las páginas de la app. Las que no son nativas todavía se muestran con la web (ADR-018). */
+private enum class Destination(val label: String, val native: Boolean = true) {
+    HOY("Hoy"),
+    EN_VIVO("En vivo"),
+    LABORATORIO("Laboratorio", native = false),
+    RIESGO("Riesgo"),
+    MERCADO("Mercado", native = false),
+    DECISIONES("Decisiones"),
+    DIARIO("Diario"),
+    PROYECTO("Proyecto"),
+    REPORTES("Reportes"),
+    AJUSTES("Ajustes"),
+    ;
+
+    val path: String get() = "/" + name.lowercase().replace('_', '-')
 }
 
-/** Páginas que todavía se muestran con la web dentro de la app, mientras se pasan a nativo. */
-private val MORE_PAGES = listOf(
-    "Mercado" to "/mercado",
-    "Decisiones" to "/decisiones",
-    "Diario" to "/diario",
-    "Proyecto" to "/proyecto",
-    "Reportes" to "/reportes",
-    "Ajustes" to "/ajustes",
-)
+private class BarItem(val label: String, val icon: ImageVector, val destination: Destination?)
+
+private val BAR =
+    listOf(
+        BarItem("Hoy", Icons.Filled.Home, Destination.HOY),
+        BarItem("En vivo", Icons.Filled.Favorite, Destination.EN_VIVO),
+        BarItem("Laboratorio", Icons.Filled.Build, Destination.LABORATORIO),
+        BarItem("Riesgo", Icons.Filled.Lock, Destination.RIESGO),
+        BarItem("Más", Icons.Filled.Menu, null),
+    )
+
+private val MORE = listOf(Destination.MERCADO, Destination.DECISIONES, Destination.DIARIO, Destination.PROYECTO, Destination.REPORTES, Destination.AJUSTES)
 
 /**
- * Pestañas de la app. Hoy y En vivo son nativas; el resto se muestra con el mismo Centro de
- * Mando web y pasará a nativo página por página (ADR-018).
+ * Pestañas de la app. Hoy, En vivo, Riesgo, Decisiones, Diario, Proyecto, Reportes y Ajustes son
+ * nativas; Laboratorio y Mercado siguen con el mismo Centro de Mando web mientras se portan.
  */
 @Composable
 fun AppShell(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit) {
     val client = remember(baseUrl) { ApiClient(baseUrl) }
-    var tab by rememberSaveable { mutableStateOf(Tab.HOY) }
-    var morePath by rememberSaveable { mutableStateOf("/mercado") }
+    var destination by rememberSaveable { mutableStateOf(Destination.HOY) }
     var moreOpen by remember { mutableStateOf(false) }
     var needsLogin by remember(baseUrl) { mutableStateOf(false) }
     var reload by remember(baseUrl) { mutableIntStateOf(0) }
     val resumed = rememberResumed(lifecycle)
     val now = rememberNow()
 
-    val hoy =
-        rememberPolled(client, "/api/hoy", 30_000, resumed && tab == Tab.HOY && !needsLogin, reload, { needsLogin = true }, Parsers::hoy)
-    val vivo =
-        rememberPolled(client, "/api/en-vivo", 5_000, resumed && tab == Tab.EN_VIVO && !needsLogin, reload, { needsLogin = true }, Parsers::enVivo)
+    val hoy = rememberPolled(client, "/api/hoy", 30_000, resumed && destination == Destination.HOY && !needsLogin, reload, { needsLogin = true }, Parsers::hoy)
+    val vivo = rememberPolled(client, "/api/en-vivo", 5_000, resumed && destination == Destination.EN_VIVO && !needsLogin, reload, { needsLogin = true }, Parsers::enVivo)
+    val env = Env(client, baseUrl, resumed && !needsLogin, reload, { needsLogin = true }, { reload++ }, onOpenSettings)
 
-    BackHandler(enabled = tab != Tab.HOY && !needsLogin) { tab = Tab.HOY }
+    BackHandler(enabled = destination != Destination.HOY && !needsLogin) { destination = Destination.HOY }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface, windowInsets = WindowInsets(0, 0, 0, 0)) {
-                Tab.entries.forEach { entry ->
+                BAR.forEach { item ->
                     NavigationBarItem(
-                        selected = tab == entry,
-                        onClick = { if (entry == Tab.MAS) moreOpen = true else tab = entry },
-                        icon = { Icon(entry.icon, contentDescription = null) },
-                        label = { Text(entry.label) },
+                        selected = if (item.destination == null) destination in MORE else destination == item.destination,
+                        onClick = { if (item.destination == null) moreOpen = true else destination = item.destination },
+                        icon = { Icon(item.icon, contentDescription = null) },
+                        label = { Text(item.label) },
                     )
                 }
             }
         },
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            when {
-                needsLogin ->
-                    LoginScreen(
-                        client = client,
-                        onSignedIn = {
-                            // La web del WebView y la app comparten la sesión: se entra una sola vez.
-                            client.sessionCookie?.let { CookieManager.getInstance().setCookie(baseUrl, "$it; Path=/") }
-                            CookieManager.getInstance().flush()
-                            needsLogin = false
-                            reload++
-                        },
-                        onOpenSettings = onOpenSettings,
-                    )
-                tab == Tab.HOY -> HoyScreen(hoy) { reload++ }
-                tab == Tab.EN_VIVO -> EnVivoScreen(vivo, now) { reload++ }
-                tab == Tab.LABORATORIO -> WebScreen(baseUrl, lifecycle, "/laboratorio", onOpenSettings)
-                tab == Tab.RIESGO -> WebScreen(baseUrl, lifecycle, "/riesgo", onOpenSettings)
-                else -> WebScreen(baseUrl, lifecycle, morePath, onOpenSettings)
+            if (needsLogin) {
+                LoginScreen(
+                    client = client,
+                    onSignedIn = {
+                        // La web del WebView y la app comparten la sesión: se entra una sola vez.
+                        client.sessionCookie?.let { CookieManager.getInstance().setCookie(baseUrl, "$it; Path=/") }
+                        CookieManager.getInstance().flush()
+                        needsLogin = false
+                        reload++
+                    },
+                    onOpenSettings = onOpenSettings,
+                )
+            } else {
+                when (destination) {
+                    Destination.HOY -> HoyScreen(hoy) { reload++ }
+                    Destination.EN_VIVO -> EnVivoScreen(vivo, now) { reload++ }
+                    Destination.RIESGO -> RiesgoScreen(env)
+                    Destination.DECISIONES -> DecisionesScreen(env)
+                    Destination.DIARIO -> DiarioScreen(env)
+                    Destination.PROYECTO -> ProyectoScreen(env)
+                    Destination.REPORTES -> ReportesScreen(env)
+                    Destination.AJUSTES -> AjustesScreen(env)
+                    Destination.LABORATORIO, Destination.MERCADO -> WebScreen(baseUrl, lifecycle, destination.path, onOpenSettings)
+                }
             }
         }
     }
@@ -122,18 +140,17 @@ fun AppShell(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit) 
     if (moreOpen) {
         Dialog(onDismissRequest = { moreOpen = false }) {
             Card(shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-                Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text("Más secciones", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp))
-                    MORE_PAGES.forEach { (label, path) ->
+                    MORE.forEach { target ->
                         Text(
-                            label,
+                            target.label,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        morePath = path
-                                        tab = Tab.MAS
+                                        destination = target
                                         moreOpen = false
                                     }
                                     .padding(horizontal = 16.dp, vertical = 14.dp),
