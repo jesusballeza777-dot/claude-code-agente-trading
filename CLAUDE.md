@@ -25,15 +25,16 @@ Documento rector: `docs/plan-maestro-v2.1.md` (el v2 queda como histórico). Si 
 
 ## Stack
 
-Python 3.12 · uv con lockfile · pytest + hypothesis · ruff · mypy (strict en `risk/` y `execution/`) · PostgreSQL 16 + TimescaleDB · Parquet · Docker Compose · GitHub Actions · SOPS/age · App Android: Kotlin + Jetpack Compose (ADR-010).
+Python 3.12 · uv con lockfile · pytest + hypothesis · ruff · mypy (strict en `risk/` y `execution/`) · PostgreSQL 16 + TimescaleDB · Parquet · Docker Compose · GitHub Actions · SOPS/age · Centro de Mando: FastAPI de solo lectura + React/Vite/TypeScript (ADR-014, ADR-015) · App Android: Kotlin + Jetpack Compose (ADR-010).
 
 ## Estructura del repositorio
 
 ```
 docs/            plan-maestro-v2.1.md (v2 histórico), requirements.md, risk_register.md, presupuesto.md, adr/, auditoria/
 research/        preregistration/, trials.csv, notebooks/ (sin datos crudos)
-src/trading/     data/, features/, signals/, risk/, decision/, execution/, audit/, reporting/
+src/trading/     data/, features/, signals/, backtest/, risk/, decision/, execution/, audit/, reporting/, api/
 tests/           espejo de src/
 ops/             runbook.md, incidents/
+app/web/         Centro de Mando (React + Vite + TypeScript); tests y E2E en CI
 app/android/     app Android (Kotlin + Compose); se compila en CI
 ```

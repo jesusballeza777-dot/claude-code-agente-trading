@@ -65,19 +65,19 @@ Ver `docs/presupuesto.md`: ≈USD 110-117/mes **[estimado]**, con el analista de
 
 ## 7. Roadmap y estado
 
-| Fase | Estado al 23-oct-2026 |
+| Fase | Estado al 24-oct-2026 |
 |---|---|
 | F0 Alcance y gobernanza | **Cerrada** |
 | F1 Plataforma | Pendiente del propietario (`docs/f1-verificacion-plataforma.md`) |
 | F2 Fundaciones | En curso: CI, motor de riesgo y auditoría hechos; falta SOPS/age operativo (clave pública del propietario) |
-| F3 Datos públicos | **En curso** (sin claves, solo el archivo público; ADR-012) |
-| F4 Investigación | En curso: backtester; las hipótesis pre-registradas se corren sobre 2020-2024 sin abrir el holdout |
+| F3 Datos públicos | En curso: 2020-2024 descargado y verificado (99.88% de completitud, `docs/datos/calidad-f3.md`); falta una segunda fuente independiente |
+| F4 Investigación | En curso: 296 corridas sobre 2020-2024 con el holdout sellado; **ninguna hipótesis pasa el gate** (`docs/resultados/f4-analisis.md`) |
 | F5 Analista Claude | No empezada |
 | F6 Riesgo y ejecución | No empezada (el motor de riesgo v0/v1 ya existe) |
 | F7 Sombra | No empezada (≥12 semanas) |
 | F8 Piloto real | No empezada (3 meses, USD 1,500) |
 | F9 Escala | No empezada |
-| Centro de Mando | En curso, de forma transversal (ADR-014, ADR-015) |
+| Centro de Mando | API y app web hechas, con E2E y Docker (ADR-014, ADR-015); falta el despliegue en el VPS |
 
 Faltantes, horas estimadas y lista del propietario: `docs/estado-y-faltantes.md`.
 
