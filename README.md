@@ -31,7 +31,7 @@ src/trading/     data/ (F3), features/, signals/ (H1, H2, H4), backtest/ (F4), r
                  audit/, reporting/ (PDF, Excel, contador), decision/, execution/
 tests/           espejo de src/
 app/web/         Centro de Mando: React + Vite + TypeScript (Vitest y Playwright)
-app/android/     app Android de control (Kotlin + Compose), compilada en CI
+app/android/     app Android: cliente nativo del Centro de Mando (Kotlin), compilada en CI
 ops/             runbook.md, incidents/, secrets.md, docker/ (imágenes del Centro de Mando)
 data/            datos públicos descargados (no se versiona)
 ```
@@ -60,6 +60,13 @@ cd app/web && npm ci && npm run dev                          # app en 127.0.0.1:
 ```
 
 Para que la API sirva la app compilada en `127.0.0.1:8000`: `cd app/web && npm run build`.
+
+### App de celular
+
+- **Android (APK):** [`app/android/README.md`](app/android/README.md). Muestra el Centro de Mando completo con bloqueo
+  biométrico; se conecta por cable USB (`adb reverse tcp:8080 tcp:8080`) o por Tailscale. ADR-018.
+- **Sin APK:** abre la dirección del Centro de Mando en el navegador del celular y usa "Instalar app" / "Añadir a la pantalla de inicio".
+- **En vivo:** la página `/en-vivo` muestra qué piezas existen y trabajan, y qué ha pasado; se actualiza cada 5 s.
 
 ### Datos públicos y backtests (sin claves)
 

@@ -1,6 +1,6 @@
 // Decisiones, Diario, Proyecto, Reportes y Ajustes.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CircleCheck, CircleDot, CircleMinus, Clock, Download, FileJson, FileSpreadsheet, FileText, NotebookPen } from "lucide-react";
+import { CircleCheck, CircleDot, CircleMinus, Clock, Download, FileJson, FileSpreadsheet, FileText, NotebookPen, Settings } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { BrujulaSays } from "../components/Brujula";
@@ -311,6 +311,9 @@ export function Reportes() {
   );
 }
 
+/** La app Android añade "BrujulaAndroid" al agente de usuario del WebView (ADR-018). */
+const IN_ANDROID_APP = /BrujulaAndroid/.test(navigator.userAgent);
+
 export function Ajustes() {
   const { theme, setTheme, explain, setExplain, setWelcomed } = usePrefs();
   const limits = useQuery({ queryKey: ["limites"], queryFn: () => api.get<Limites>("/api/riesgo/limites") });
@@ -327,6 +330,16 @@ export function Ajustes() {
             </Button>
           </div>
         </Card>
+        {IN_ANDROID_APP && (
+          <Card title="App Android" subtitle="Estás viendo el Centro de Mando dentro de la app." testId="ajustes-app">
+            <a
+              href="brujula://ajustes"
+              className="inline-flex items-center gap-2 rounded-lg border border-line px-3 py-2 text-sm font-medium text-accent hover:bg-surface-2"
+            >
+              <Settings aria-hidden size={16} /> Servidor, bloqueo y privacidad
+            </a>
+          </Card>
+        )}
         <Card title="Notificaciones" subtitle="Llegan con la F6 (alertas por Telegram o la app Android, sin datos sensibles).">
           <EmptyState>Aún no hay notificaciones que configurar.</EmptyState>
         </Card>

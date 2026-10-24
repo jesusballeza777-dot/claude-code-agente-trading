@@ -23,3 +23,4 @@ Un ADR solo pasa a **Aceptado** con la aprobación explícita del propietario. L
 | [015](015-seguridad-del-centro-de-mando.md) | Seguridad del Centro de Mando | Aceptado |
 | [016](016-datos-publicos-y-almacenamiento.md) | Datos públicos de la F3 y almacenamiento (Parquet + TimescaleDB) | Aceptado |
 | [017](017-reportes-descargables.md) | Reportes descargables (PDF, XLSX, CSV, JSON y Parquet) | Aceptado |
+| [018](018-app-android-cliente-del-centro-de-mando.md) | App Android como cliente nativo del Centro de Mando | Aceptado |

@@ -83,6 +83,22 @@ test("celular: barra inferior con pestañas y acceso a todo lo demás", async ({
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
+test("ajustes: en el navegador no hay enlace a la app Android", async ({ page }) => {
+  await page.goto("/ajustes");
+  await settle(page);
+  await expect(page.getByTestId("ajustes-app")).toHaveCount(0);
+});
+
+test.describe("dentro de la app Android", () => {
+  test.use({ userAgent: "Mozilla/5.0 (Linux; Android 15) Chrome/130 Mobile BrujulaAndroid/0.2.0" });
+
+  test("ajustes: enlace a los ajustes nativos de la app", async ({ page }) => {
+    await page.goto("/ajustes");
+    await settle(page);
+    await expect(page.getByTestId("ajustes-app").getByRole("link")).toHaveAttribute("href", "brujula://ajustes");
+  });
+});
+
 test("diario: se guarda una nota (la única escritura de la app)", async ({ page }) => {
   await page.goto("/diario");
   await settle(page);

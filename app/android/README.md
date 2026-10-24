@@ -1,10 +1,35 @@
-# App Android: Agente Trading
+# App Android: Brújula
 
-Esqueleto de la app de control (ADR-010; especificación en `docs/app/especificacion.md`).
+Cliente nativo y de solo lectura del Centro de Mando (ADR-018). Es la app de celular personal del propietario.
 
-- **Estado:** datos de demostración, con un aviso visible en todas las pantallas. Sin permiso de Internet ni conexión al backend.
-- **Pantallas:** Resumen, Decisiones, Aprendizaje, Reportes y Controles (estos últimos desactivados hasta la F6).
-- **Seguridad:** el teléfono nunca tiene claves de exchange ni de wallets. `LIVE_TRADING` y los límites de riesgo no se pueden cambiar desde la app.
+- **Qué hace:** abre el Centro de Mando de tu servidor (las diez páginas, En vivo, laboratorio, riesgo, reportes) con bloqueo
+  por huella, rostro o PIN, arrastrar para actualizar, descarga de reportes y pantalla de error con reintento.
+- **Qué no hace:** no envía órdenes, no activa `LIVE_TRADING`, no crea claves ni cambia límites, y no guarda claves de
+  exchanges ni de wallets. Su único permiso es INTERNET.
+- **Datos:** vienen del servidor. Hoy el servidor es tu computadora (por cable USB) o, cuando exista, tu VPS con Tailscale.
+
+## Instalar el APK
+
+1. En GitHub, abre la última ejecución verde del workflow **CI** de la rama y descarga el artefacto `app-debug-apk`
+   (hay que iniciar sesión en GitHub; caduca a los 14 días).
+2. Descomprime el ZIP y abre `app-debug.apk` en el teléfono, permitiendo instalar desde esa fuente.
+3. Es un APK de depuración: sirve para uso personal. La firma de release con tu propia clave queda pendiente.
+
+## Conectar
+
+**Por cable USB, sin red** (con el Centro de Mando corriendo en tu computadora con `docker compose up`):
+
+```bash
+adb reverse tcp:8080 tcp:8080     # el teléfono ve el puerto 8080 de tu computadora como 127.0.0.1:8080
+```
+
+En la app escribe `127.0.0.1:8080`. El teléfono necesita la depuración USB activada solo para este paso.
+
+**Desde cualquier lugar** (cuando exista el VPS): instala Tailscale en el servidor y en el teléfono, ejecuta
+`tailscale serve --bg 8080` en el servidor y escribe `https://tu-servidor.tu-red.ts.net`. Con la autenticación activa
+(`TRADING_API_AUTH=on`) la app mostrará el acceso con contraseña y código TOTP. Ver el README principal.
+
+Para cambiar de servidor o del bloqueo: Ajustes de la web → "Servidor, bloqueo y privacidad".
 
 ## Compilar
 
@@ -15,15 +40,17 @@ cd app/android
 ./gradlew assembleDebug testDebugUnitTest
 ```
 
-El CI (`.github/workflows/ci.yml`, job `android`) compila, ejecuta los tests y publica el APK de depuración como
-artefacto `app-debug-apk`. Para instalarlo: descargar el artefacto desde la ejecución del CI en GitHub y abrir el
-APK en el teléfono (permitiendo la instalación desde esa fuente).
+El CI (job `android`) compila, ejecuta los tests y publica el APK. Los tests de JVM cubren la validación de la dirección,
+la política de navegación del WebView y el bloqueo; la interfaz y el WebView se comprobarán en un teléfono real
+(**por verificar**: este entorno no tiene SDK de Android).
 
 ## Dependencias y por qué
 
 | Dependencia | Para qué |
 |---|---|
 | Android Gradle Plugin 8.7.3, Kotlin 2.0.21 | Compilar la app |
-| Jetpack Compose (BOM 2024.12.01), Material 3, iconos básicos | Interfaz declarativa estándar de Android |
-| activity-compose 1.9.3 | Arrancar Compose desde la actividad |
-| JUnit 4.13.2 | Tests de formato |
+| Jetpack Compose (BOM 2024.12.01), Material 3, iconos básicos | Pantallas de conexión, bloqueo y error |
+| activity-compose 1.9.3, fragment 1.8.5 | Actividad con Compose y base para el diálogo biométrico |
+| biometric 1.1.0 | Huella, rostro o PIN del teléfono |
+| swiperefreshlayout 1.1.0 | Arrastrar para actualizar sobre el WebView |
+| JUnit 4.13.2 | Tests de la lógica |
