@@ -13,6 +13,7 @@ concurrency:
 
 env:
   UV_VERSION: "0.11.32"
+  NODE_VERSION: "22"
   GITLEAKS_VERSION: "v8.30.1"
   HYPOTHESIS_PROFILE: ci
 
@@ -20,7 +21,22 @@ jobs:
   checks:
     name: lint, tipos y tests
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
+    # TimescaleDB para los tests de carga (F3). Solo existe dentro del job, sin contraseña.
+    services:
+      db:
+        image: timescale/timescaledb:2.17.2-pg16
+        env:
+          POSTGRES_USER: trading
+          POSTGRES_DB: trading
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U trading -d trading"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      TRADING_DB_DSN: postgresql://trading@localhost:5432/trading
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -32,8 +48,18 @@ jobs:
           python-version: "3.12"
           enable-cache: true
 
+      - name: Pango para los PDF de WeasyPrint (ADR-017)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b
+
       - name: Instalar dependencias (lockfile obligatorio)
         run: uv sync --locked
+
+      - name: Vulnerabilidades conocidas en dependencias (pip-audit)
+        run: uv run --frozen pip-audit --progress-spinner off --skip-editable
+
+      # Sin esto los tests de TimescaleDB se omitirían en silencio.
+      - name: TimescaleDB disponible
+        run: uv run --frozen python -c "import os, psycopg; psycopg.connect(os.environ['TRADING_DB_DSN'], connect_timeout=5).close()"
 
       - name: Higiene de ficheros (pre-commit; gitleaks, ruff y mypy corren en pasos propios)
         env:
@@ -54,6 +80,114 @@ jobs:
 
       - name: Cobertura del motor de riesgo >= 95% (CLAUDE.md regla 4)
         run: uv run --frozen coverage report --include="src/trading/risk/*" --fail-under=95
+
+      - name: Cobertura de la API y los reportes >= 80% (prompt v3)
+        run: |
+          uv run --frozen coverage report --include="src/trading/api/*" --fail-under=80
+          uv run --frozen coverage report --include="src/trading/reporting/*" --fail-under=80
+
+  frontend:
+    name: Centro de Mando (tipos, tests y build)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app/web
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: app/web/package-lock.json
+
+      - name: Instalar dependencias (lockfile obligatorio)
+        run: npm ci --ignore-scripts
+
+      - name: Vulnerabilidades conocidas (npm audit)
+        run: npm audit --audit-level=high
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Vitest
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  e2e:
+    name: Centro de Mando E2E (Playwright + axe)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.12"
+          enable-cache: true
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: app/web/package-lock.json
+
+      - name: Pango para los PDF de WeasyPrint (ADR-017)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b
+
+      - name: Backend (lockfile obligatorio)
+        run: uv sync --locked
+
+      - name: Frontend compilado
+        working-directory: app/web
+        run: npm ci --ignore-scripts && npm run build
+
+      - name: Chromium de Playwright
+        working-directory: app/web
+        run: npx playwright install --with-deps chromium
+
+      # Sin datos de mercado en CI: las vistas de mercado salen rotuladas como demo.
+      - name: Flujos principales y accesibilidad
+        working-directory: app/web
+        env:
+          CI: "1"
+        run: npx playwright test e2e/flujos.spec.ts
+
+  docker:
+    name: docker compose (imágenes y humo)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Construir y levantar db + backend + frontend
+        run: CODE_COMMIT="${GITHUB_SHA::12}" docker compose up --build --detach --wait --wait-timeout 300
+
+      - name: Humo por nginx (solo 127.0.0.1)
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:8080/ --output /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8080/api/estado | grep -q '"live_trading":false'
+          curl --fail --silent --show-error http://127.0.0.1:8080/api/reportes/ficha/pdf --output ficha.pdf
+          head -c 4 ficha.pdf | grep -q '%PDF'
+          curl --fail --silent --show-error --head http://127.0.0.1:8080/ | grep -qi '^content-security-policy:'
+
+      - name: Registros si algo falla
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Bajar el entorno
+        if: always()
+        run: docker compose down --volumes
 
   gitleaks:
     name: gitleaks (historial completo)

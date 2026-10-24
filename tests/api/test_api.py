@@ -42,6 +42,9 @@ def test_status_today_and_brief(client: TestClient) -> None:
     assert status["live_trading"] is False
     assert status["holdout"]["sellado"] is True
     assert status["intentos"] == {"principales": 2, "total": 4}
+    todo = status["pendientes_propietario"]
+    assert todo[0]["documento"] == "docs/f1-verificacion-plataforma.md"
+    assert all(t["tarea"] and t["documento"] for t in todo)
     today = client.get("/api/hoy").json()
     assert today["cuenta"]["origen"] == "demo"
     assert today["parte_del_dia"]["validado"] is True
@@ -159,6 +162,10 @@ def test_decisions_project_glossary(client: TestClient) -> None:
     assert any(a["id"] == "013" and "Propuesto" in a["estado"] for a in project["adr"])
     assert any(r["id"] == "R01" for r in project["riesgos"])
     assert project["costes"]["conceptos"][0]["concepto"] == "Claude Max 5x"
+    assert (
+        project["pendientes_propietario"]
+        == client.get("/api/estado").json()["pendientes_propietario"]
+    )
     glossary = client.get("/api/glosario").json()
     assert glossary["copiloto"] == "Brújula"
     assert "PBO" in glossary["terminos"]

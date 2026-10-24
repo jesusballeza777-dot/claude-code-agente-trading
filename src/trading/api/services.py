@@ -62,7 +62,7 @@ PHASES: Final = (
     ("F0", "Alcance y gobernanza", "cerrada"),
     ("F1", "Plataforma (verificaciones del propietario)", "pendiente del propietario"),
     ("F2", "Fundaciones: CI, motor de riesgo, auditoría", "en curso"),
-    ("F3", "Datos públicos sin claves", "hecha (2020-2024)"),
+    ("F3", "Datos públicos sin claves", "en curso: falta 2.ª fuente"),
     ("F4", "Investigación y backtests", "en curso: holdout sellado"),
     ("F5", "Analista Claude", "no empezada"),
     ("F6", "Riesgo y ejecución", "no empezada"),
@@ -71,23 +71,8 @@ PHASES: Final = (
     ("F9", "Escala", "no empezada"),
 )
 
-OWNER_TODO: Final = (
-    (
-        "Verificar en Binance que tu cuenta permite futuros USDⓈ-M, comisiones y nocional mínimo",
-        "docs/f1-verificacion-plataforma.md",
-    ),
-    ("Generar tu clave age y compartir solo la pública para SOPS", "ops/secrets.md"),
-    (
-        "Aprobar o ajustar el ADR-013 (reglas de riesgo más restrictivas)",
-        "docs/adr/013-motor-de-riesgo-v1-reglas-ampliadas.md",
-    ),
-    ("Reclamar los créditos de API de Max 5x en la consola", "docs/presupuesto.md"),
-    (
-        "Revisar los resultados de la F4 y decidir los siguientes pre-registros",
-        "docs/resultados/f4-2020-2024.md",
-    ),
-    ("Validar el formato del reporte fiscal con tu contador", "docs/app/especificacion.md"),
-)
+# Fuente única de los pendientes del propietario (tabla del §3); la app no guarda otra copia.
+STATUS_DOC: Final = Path("docs") / "estado-y-faltantes.md"
 
 
 class Services:
@@ -159,7 +144,7 @@ class Services:
                 "principales": sum(1 for r in trials if r["tipo_muestra"] == "principal"),
                 "total": len(trials),
             },
-            "pendientes_propietario": [{"tarea": t, "documento": d} for t, d in OWNER_TODO],
+            "pendientes_propietario": self.owner_todo(),
         }
 
     def today(self) -> dict[str, Any]:
@@ -419,6 +404,16 @@ class Services:
             "matriz": matrix,
         }
 
+    def owner_todo(self) -> list[dict[str, str]]:
+        """Pendientes del propietario, en orden, desde docs/estado-y-faltantes.md §3."""
+        for table in read_tables(self.repo / STATUS_DOC):
+            if table and "Pendiente" in table[0]:
+                return [
+                    {"tarea": plain(row["Pendiente"]), "documento": plain(row.get("Documento", ""))}
+                    for row in table
+                ]
+        return []
+
     def _latest_universe(self) -> list[str]:
         """Miembros del último universo de H2 (docs/datos/universo-h2-v1.md), por liquidez."""
         for table in read_tables(self.repo / "docs" / "datos" / "universo-h2-v1.md"):
@@ -628,7 +623,7 @@ class Services:
             "fases": [{"id": f, "nombre": n, "estado": s} for f, n, s in PHASES],
             "adr": adrs,
             "riesgos": risks,
-            "pendientes_propietario": [{"tarea": t, "documento": d} for t, d in OWNER_TODO],
+            "pendientes_propietario": self.owner_todo(),
             "costes": {
                 "conceptos": costs,
                 "tipo_de_cambio": {

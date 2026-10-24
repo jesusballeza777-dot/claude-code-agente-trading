@@ -1,6 +1,6 @@
 // Decisiones, Diario, Proyecto, Reportes y Ajustes.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, FileJson, FileSpreadsheet, FileText, NotebookPen } from "lucide-react";
+import { CircleCheck, CircleDot, CircleMinus, Clock, Download, FileJson, FileSpreadsheet, FileText, NotebookPen } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { BrujulaSays } from "../components/Brujula";
@@ -8,7 +8,6 @@ import {
   Badge,
   Button,
   Card,
-  Check,
   EmptyState,
   ErrorState,
   ExplainLine,
@@ -135,14 +134,34 @@ export function Diario() {
   );
 }
 
-const NIVEL: Record<string, number> = { Baja: 0, Media: 1, Alta: 2 };
+// El registro escribe la probabilidad en femenino (Alta) y el impacto en masculino (Alto).
+const NIVEL: Record<string, number> = { Baja: 0, Bajo: 0, Media: 1, Medio: 1, Alta: 2, Alto: 2 };
+const nivel = (text: string) => NIVEL[text.split(" ")[0] ?? ""] ?? -1;
+
+/** Estado de una fase: hecha, en curso, pendiente de ti o no empezada (icono + texto, no solo color). */
+function PhaseStatus({ estado }: { estado: string }) {
+  const [Icon, tone] = /^(cerrada|hecha)/.test(estado)
+    ? [CircleCheck, "text-gain"]
+    : estado.startsWith("pendiente")
+      ? [Clock, "text-warn"]
+      : estado.startsWith("en curso")
+        ? [CircleDot, "text-accent"]
+        : [CircleMinus, "text-neutral"];
+  return (
+    <span className={cx("inline-flex items-center gap-1 text-right", tone)}>
+      <Icon aria-hidden size={16} className="shrink-0" /> {estado}
+    </span>
+  );
+}
 
 export function Proyecto() {
   const { data, error, isLoading } = useQuery({ queryKey: ["proyecto"], queryFn: () => api.get<ProyectoData>("/api/proyecto") });
   if (isLoading) return <Loading />;
   if (error || !data) return <ErrorState error={error} />;
-  const matrix = [2, 1, 0].map((p) => [0, 1, 2].map((i) => data.riesgos.filter((x) => (NIVEL[x.probabilidad.split(" ")[0] ?? ""] ?? -1) === p && (NIVEL[x.impacto.split(" ")[0] ?? ""] ?? -1) === i)));
-  const label = ["Baja", "Media", "Alta"];
+  const matrix = [2, 1, 0].map((p) => [0, 1, 2].map((i) => data.riesgos.filter((x) => nivel(x.probabilidad) === p && nivel(x.impacto) === i)));
+  const outside = data.riesgos.filter((x) => nivel(x.probabilidad) < 0 || nivel(x.impacto) < 0);
+  const probLabel = ["baja", "media", "alta"];
+  const impactLabel = ["bajo", "medio", "alto"];
   return (
     <>
       <PageHeader title="Proyecto" intro="Roadmap, decisiones de arquitectura, riesgos y costes, leídos de los documentos del repositorio." origen={data.origen} />
@@ -154,7 +173,7 @@ export function Proyecto() {
                 <span>
                   <span className="cifra font-semibold">{f.id}</span> {f.nombre}
                 </span>
-                <Check ok={f.estado.startsWith("cerrada") || f.estado.startsWith("hecha") ? true : f.estado.startsWith("no empezada") ? null : false} label={f.estado} />
+                <PhaseStatus estado={f.estado} />
               </li>
             ))}
           </ol>
@@ -169,34 +188,41 @@ export function Proyecto() {
           </ol>
         </Card>
         <Card title="Matriz de riesgos" subtitle="Probabilidad × impacto (docs/risk_register.md)">
-          <div className="grid grid-cols-[4rem_repeat(3,1fr)] gap-1 text-xs">
-            <span />
-            {label.map((l) => (
-              <span key={l} className="text-center text-ink-muted">
-                Impacto {l.toLowerCase()}
-              </span>
-            ))}
-            {matrix.map((row, p) => (
-              <div key={p} className="contents">
-                <span className="flex items-center text-ink-muted">Prob. {label[2 - p]?.toLowerCase()}</span>
-                {row.map((cell, i) => (
-                  <div
-                    key={i}
-                    className="min-h-14 rounded-lg border border-line p-1.5"
-                    style={{ background: `color-mix(in srgb, var(--loss) ${((2 - p) + i) * 8}%, transparent)` }}
-                    title={cell.map((c) => `${c.id}: ${c.riesgo}`).join("\n")}
-                  >
-                    <div className="flex flex-wrap gap-1">
-                      {cell.map((c) => (
-                        <span key={c.id} className="rounded bg-surface px-1 font-mono">
-                          {c.id}
-                        </span>
-                      ))}
+          <div data-testid="matriz-riesgos">
+            <div className="grid grid-cols-[4rem_repeat(3,1fr)] gap-1 text-xs">
+              <span />
+              {impactLabel.map((l) => (
+                <span key={l} className="text-center text-ink-muted">
+                  Impacto {l}
+                </span>
+              ))}
+              {matrix.map((row, p) => (
+                <div key={p} className="contents">
+                  <span className="flex items-center text-ink-muted">Prob. {probLabel[2 - p]}</span>
+                  {row.map((cell, i) => (
+                    <div
+                      key={i}
+                      className="min-h-14 rounded-lg border border-line p-1.5"
+                      style={{ background: `color-mix(in srgb, var(--loss) ${((2 - p) + i) * 8}%, transparent)` }}
+                      title={cell.map((c) => `${c.id}: ${c.riesgo}`).join("\n")}
+                    >
+                      <div className="flex flex-wrap gap-1">
+                        {cell.map((c) => (
+                          <span key={c.id} className="rounded bg-surface px-1 font-mono">
+                            {c.id}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ))}
+                  ))}
+                </div>
+              ))}
+            </div>
+            {outside.length > 0 && (
+              <p className="mt-3 text-xs text-ink-muted">
+                Fuera de la matriz: {outside.map((x) => `${x.id} (${x.probabilidad.toLowerCase()})`).join(", ")}.
+              </p>
+            )}
           </div>
         </Card>
         <Card title="Costes" subtitle={`Tipo de cambio: ${data.costes.tipo_de_cambio.mxn_por_usd} MXN/USD (${data.costes.tipo_de_cambio.estado})`}>

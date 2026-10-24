@@ -134,3 +134,24 @@ def test_documents_render_provenance() -> None:
     assert "2026-10-23 12:00 UTC" in html
     assert "<polyline" in html
     assert svg_line([1.0]) == ""
+
+
+def test_code_commit_without_git_comes_from_the_image(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from trading.api import reports
+
+    def no_git(*_args: object, **_kwargs: object) -> None:
+        raise FileNotFoundError("git")
+
+    monkeypatch.setattr(reports.subprocess, "run", no_git)
+    monkeypatch.setenv("TRADING_CODE_COMMIT", "0123456789abcdef")
+    assert reports._git_head(tmp_path) == "0123456789ab"
+    monkeypatch.delenv("TRADING_CODE_COMMIT")
+    assert reports._git_head(tmp_path) == "desconocido"
+
+
+def test_owner_todo_is_empty_without_the_status_document(tmp_path: Path) -> None:
+    from trading.api.services import Services
+
+    assert Services(tmp_path, tmp_path / "data", tmp_path / "estado").owner_todo() == []

@@ -111,6 +111,7 @@ def build_repo(root: Path, *, with_data: bool) -> Path:
         "docs/risk_register.md",
         "docs/presupuesto.md",
         "docs/datos/calidad-f3.md",
+        "docs/estado-y-faltantes.md",
     ):
         target = root / relative
         target.parent.mkdir(parents=True, exist_ok=True)

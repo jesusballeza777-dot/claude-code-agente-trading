@@ -10,6 +10,7 @@ import csv
 import hashlib
 import io
 import json
+import os
 import subprocess  # nosec B404 - solo git local
 from collections.abc import Sequence
 from datetime import UTC, date, datetime
@@ -303,10 +304,14 @@ def _fmt(value: Any) -> str:
 
 
 def _git_head(repo: Path) -> str:
-    result = subprocess.run(  # noqa: S603
-        ["git", "-C", str(repo), "rev-parse", "--short=12", "HEAD"],  # noqa: S607
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    """Commit del código. En la imagen Docker no hay git: lo fija el build (TRADING_CODE_COMMIT)."""
+    try:
+        result = subprocess.run(  # noqa: S603
+            ["git", "-C", str(repo), "rev-parse", "--short=12", "HEAD"],  # noqa: S607
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        return os.environ.get("TRADING_CODE_COMMIT", "").strip()[:12] or "desconocido"
     return result.stdout.strip() or "desconocido"

@@ -47,6 +47,14 @@ test("reportes: la ficha de estrategia se descarga como PDF", async ({ page }) =
   expect(content.subarray(0, 4).toString()).toBe("%PDF");
 });
 
+test("proyecto: la matriz de riesgos ubica cada riesgo del registro", async ({ page }) => {
+  await page.goto("/proyecto");
+  await settle(page);
+  const matrix = page.getByTestId("matriz-riesgos");
+  await expect(matrix.getByText("R01", { exact: true })).toBeVisible();
+  await expect(matrix).toContainText("Fuera de la matriz: R06");
+});
+
 test("diario: se guarda una nota (la única escritura de la app)", async ({ page }) => {
   await page.goto("/diario");
   await settle(page);
