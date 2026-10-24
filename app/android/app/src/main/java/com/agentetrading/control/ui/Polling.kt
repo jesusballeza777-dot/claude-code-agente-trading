@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.agentetrading.control.net.ApiClient
+import com.agentetrading.control.net.DataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -23,6 +24,8 @@ data class Polled<T>(
     val error: String? = null,
     val loading: Boolean = true,
     val updatedAtMs: Long = 0L,
+    /** El dato existe pero solo con un servidor conectado (modo sin servidor). */
+    val needsServer: Boolean = false,
 )
 
 /**
@@ -31,7 +34,7 @@ data class Polled<T>(
  */
 @Composable
 fun <T> rememberPolled(
-    client: ApiClient,
+    client: DataSource,
     path: String,
     intervalMs: Long,
     active: Boolean,
@@ -58,6 +61,10 @@ fun <T> rememberPolled(
                     return@LaunchedEffect
                 }
                 is ApiClient.Result.Failed -> state = state.copy(error = result.message, loading = false)
+                is ApiClient.Result.NeedsServer -> {
+                    state = state.copy(error = result.message, loading = false, needsServer = true)
+                    return@LaunchedEffect // no hay nada que reintentar sin servidor
+                }
             }
             delay(intervalMs)
         }

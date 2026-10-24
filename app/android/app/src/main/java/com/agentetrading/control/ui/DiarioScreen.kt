@@ -59,6 +59,7 @@ private fun NotaCard(env: Env) {
                 }
                 is ApiClient.Result.NeedsLogin -> env.onNeedsLogin()
                 is ApiClient.Result.Failed -> message = false to result.message
+                is ApiClient.Result.NeedsServer -> message = false to result.message
             }
             busy = false
         }

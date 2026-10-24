@@ -65,6 +65,7 @@ Para que la API sirva la app compilada en `127.0.0.1:8000`: `cd app/web && npm r
 
 - **Android (APK):** [`app/android/README.md`](app/android/README.md). Muestra el Centro de Mando completo con bloqueo
   biométrico; se conecta por cable USB (`adb reverse tcp:8080 tcp:8080`) o por Tailscale. ADR-018.
+- **Sin servidor:** la app abre con "Usar sin servidor" y lleva dentro los resultados de la investigación, el estado del proyecto y tus notas; la calculadora de riesgo, los datos de mercado y los reportes necesitan tu servidor.
 - **Sin APK:** abre la dirección del Centro de Mando en el navegador del celular y usa "Instalar app" / "Añadir a la pantalla de inicio".
 - **En vivo:** la página `/en-vivo` muestra qué piezas existen y trabajan, y qué ha pasado; se actualiza cada 5 s.
 

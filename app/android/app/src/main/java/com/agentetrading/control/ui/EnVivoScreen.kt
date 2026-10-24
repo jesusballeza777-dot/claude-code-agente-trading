@@ -25,7 +25,7 @@ import com.agentetrading.control.model.Motor
 
 /** En vivo: qué piezas existen y trabajan, qué ha pasado y qué decisiones (de ejemplo) llegarán. */
 @Composable
-fun EnVivoScreen(polled: Polled<EnVivo>, now: Long, onRefresh: () -> Unit) {
+fun EnVivoScreen(polled: Polled<EnVivo>, now: Long, local: Boolean, onRefresh: () -> Unit) {
     val vivo = polled.data
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 12.dp),
@@ -36,11 +36,13 @@ fun EnVivoScreen(polled: Polled<EnVivo>, now: Long, onRefresh: () -> Unit) {
             vivo == null && polled.error != null -> ErrorBox(polled.error, onRefresh)
             vivo == null -> LoadingBox()
             else -> {
-                Pulso(vivo, polled, now)
+                if (local) SinServidor() else Pulso(vivo, polled, now)
+                // Sin servidor no hay API ni datos que "responden": se omiten esas dos piezas.
+                val motores = if (local) vivo.motores.filter { it.id != "api" && it.id != "datos" } else vivo.motores
                 InfoCard("Piezas del sistema", subtitle = "Solo lo que existe aparece como activo.") {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { vivo.motores.forEach { MotorRow(it) } }
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { motores.forEach { MotorRow(it) } }
                 }
-                InfoCard("Actividad", subtitle = "${vivo.totalEventos} eventos registrados") {
+                if (!local) InfoCard("Actividad", subtitle = "${vivo.totalEventos} eventos registrados") {
                     if (vivo.eventos.isEmpty()) {
                         Text(
                             "Aún no hay actividad. Aquí aparecerán tus notas, los reportes que generes y, desde la F7, cada decisión de la sombra.",
@@ -135,5 +137,18 @@ private fun MotorRow(motor: Motor) {
             Text(motor.detalle, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Text(motor.estado, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = tone.color())
+    }
+}
+
+@Composable
+private fun SinServidor() {
+    val openSettings = LocalOpenSettings.current
+    InfoCard("Sin servidor conectado") {
+        Text(
+            "En vivo muestra si el sistema responde, y para eso hace falta un servidor. Aquí ves el estado del proyecto según los datos incluidos en la app.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        androidx.compose.material3.Button(onClick = openSettings) { Text("Conectar mi servidor") }
     }
 }

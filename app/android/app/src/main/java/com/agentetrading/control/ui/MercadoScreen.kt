@@ -56,7 +56,9 @@ fun MercadoScreen(env: Env) {
         "Velas reales del archivo público de Binance (2020-2024) con los indicadores que usan las hipótesis. El holdout de 2025 en adelante no se muestra.",
         candles,
         env.refresh,
-        header = { Selectors(symbols.data?.simbolos ?: listOf(symbol), symbol, { symbol = it }, interval, { interval = it }, window) { window = it } },
+        header = {
+            if (!candles.needsServer) Selectors(symbols.data?.simbolos ?: listOf(symbol), symbol, { symbol = it }, interval, { interval = it }, window) { window = it }
+        },
     ) { v ->
         GraficoCard(v, window)
         FundingCard(v)

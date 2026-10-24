@@ -6,11 +6,18 @@ import java.net.URL
 import org.json.JSONException
 import org.json.JSONObject
 
+/** De dónde salen los datos: el servidor del propietario (`ApiClient`) o la instantánea incluida en la app (`LocalSource`). */
+interface DataSource {
+    fun get(path: String): ApiClient.Result
+
+    fun post(path: String, body: JSONObject): ApiClient.Result
+}
+
 /**
  * Cliente de la API del Centro de Mando. Solo hace GET, salvo el inicio de sesión.
  * La sesión (cookie) vive en memoria: al cerrar la app hay que volver a entrar.
  */
-class ApiClient(private val baseUrl: String, private val timeoutMs: Int = 8_000) {
+class ApiClient(private val baseUrl: String, private val timeoutMs: Int = 8_000) : DataSource {
     sealed interface Result {
         data class Ok(val json: JSONObject) : Result
 
@@ -18,6 +25,9 @@ class ApiClient(private val baseUrl: String, private val timeoutMs: Int = 8_000)
         data object NeedsLogin : Result
 
         data class Failed(val message: String) : Result
+
+        /** Esto solo se puede hacer con un servidor conectado (modo sin servidor). */
+        data class NeedsServer(val message: String) : Result
     }
 
     sealed interface LoginResult {
@@ -34,10 +44,10 @@ class ApiClient(private val baseUrl: String, private val timeoutMs: Int = 8_000)
     var sessionCookie: String? = null
         private set
 
-    fun get(path: String): Result = call("GET", path, null)
+    override fun get(path: String): Result = call("GET", path, null)
 
     /** Única escritura de la API además de la sesión: las notas del diario. Lleva la cabecera anti-CSRF. */
-    fun post(path: String, body: JSONObject): Result = call("POST", path, body.toString())
+    override fun post(path: String, body: JSONObject): Result = call("POST", path, body.toString())
 
     private fun call(method: String, path: String, body: String?): Result =
         try {

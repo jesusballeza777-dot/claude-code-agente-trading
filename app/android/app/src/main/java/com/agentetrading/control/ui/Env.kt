@@ -14,16 +14,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.agentetrading.control.net.ApiClient
+import com.agentetrading.control.net.DataSource
 import org.json.JSONObject
 
 /** Lo que cada pantalla necesita de la app: el cliente, si está al frente y cómo pedir sesión o refrescar. */
 class Env(
-    val client: ApiClient,
+    val client: DataSource,
     val baseUrl: String,
     val active: Boolean,
     val reload: Int,
@@ -31,11 +32,16 @@ class Env(
     val refresh: () -> Unit,
     val onOpenSettings: () -> Unit,
     val onOpenWeb: () -> Unit = {},
+    /** Sin servidor: los datos salen de la instantánea incluida en la app. */
+    val local: Boolean = false,
 )
 
 @Composable
 fun <T> Env.poll(path: String, intervalMs: Long = 60_000, parse: (JSONObject) -> T): Polled<T> =
     rememberPolled(client, path, intervalMs, active, reload, onNeedsLogin, parse)
+
+/** Abre "Servidor y seguridad": lo usan los avisos de "esto necesita tu servidor". */
+val LocalOpenSettings = staticCompositionLocalOf<() -> Unit> { {} }
 
 /** Estructura común de una página: título, actualizar y los tres estados (cargando, error, con datos). */
 @Composable
@@ -63,6 +69,7 @@ fun <T> Page(
         }
         this.header()
         when {
+            data == null && polled.needsServer && polled.error != null -> NeedsServerBox(polled.error)
             data == null && polled.error != null -> ErrorBox(polled.error, onRefresh)
             data == null -> LoadingBox()
             else -> {

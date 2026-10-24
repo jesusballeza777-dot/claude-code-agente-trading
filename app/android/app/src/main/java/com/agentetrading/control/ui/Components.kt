@@ -259,3 +259,31 @@ fun OfflineBanner(message: String) {
         Text("Sin conexión. Mostrando lo último recibido. $message", style = MaterialTheme.typography.bodySmall)
     }
 }
+
+/** Aviso de una función que solo existe con servidor: dice por qué y lleva a conectarlo. */
+@Composable
+fun NeedsServerBox(message: String) {
+    val openSettings = LocalOpenSettings.current
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("Necesita tu servidor", style = MaterialTheme.typography.titleMedium)
+        Text(message, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Button(onClick = openSettings) { Text("Conectar mi servidor") }
+    }
+}
+
+/** Franja fija del modo sin servidor: de dónde salen los datos que se ven. */
+@Composable
+fun LocalBanner(text: String, onConnect: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().background(Palette.DemoSoft).padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(text, fontSize = 11.sp, modifier = Modifier.weight(1f))
+        androidx.compose.material3.TextButton(onClick = onConnect) { Text("Conectar", fontSize = 12.sp) }
+    }
+}

@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -59,6 +60,8 @@ fun ConnectScreen(
     secureScreen: Boolean,
     lockAvailable: Boolean,
     canClose: Boolean,
+    localActive: Boolean,
+    onUseLocal: () -> Unit,
     onSaved: (String) -> Unit,
     onLockChange: (Boolean) -> Unit,
     onSecureChange: (Boolean) -> Unit,
@@ -139,6 +142,18 @@ fun ConnectScreen(
                 failed.url?.let { url ->
                     TextButton(onClick = { onSaved(url) }) { Text("Guardar de todos modos") }
                 }
+            }
+        }
+
+        Panel("Sin servidor") {
+            Text(
+                "La app lleva dentro los resultados de la investigación (laboratorio), el estado del proyecto, los límites de riesgo y tus notas. " +
+                    "No incluye la calculadora del motor de riesgo, los datos de mercado ni los reportes: eso necesita tu servidor.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedButton(onClick = onUseLocal, modifier = Modifier.fillMaxWidth()) {
+                Text(if (localActive) "Seguir sin servidor" else "Usar sin servidor")
             }
         }
 

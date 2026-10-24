@@ -19,7 +19,15 @@ Cliente nativo y de solo lectura del Centro de Mando (ADR-018). Es la app de cel
 2. Descomprime el ZIP y abre `app-debug.apk` en el teléfono, permitiendo instalar desde esa fuente.
 3. Es un APK de depuración: sirve para uso personal. La firma de release con tu propia clave queda pendiente.
 
-## Conectar
+## Sin servidor
+
+Al abrir la app por primera vez toca **Usar sin servidor**: no pide ninguna dirección. Lleva dentro los resultados reales de la F4,
+el estado del proyecto, los límites y tus notas (se guardan en el teléfono). **Necesitan servidor:** la calculadora del motor de
+riesgo, los datos de mercado (≈200 MB) y los reportes; la app lo dice donde corresponde. Los datos incluidos son los del commit
+con el que se compiló el APK (la franja de arriba dice cuándo). Se generan en la CI con `ops/android_snapshot.py`; una compilación
+local sin ese paso no los incluye.
+
+## Conectar un servidor
 
 **Por cable USB, sin red** (con el Centro de Mando corriendo en tu computadora con `docker compose up`):
 
@@ -44,7 +52,7 @@ cd app/android
 ./gradlew assembleDebug testDebugUnitTest
 ```
 
-El CI (job `android`) compila, ejecuta los tests y publica el APK. Los tests de JVM (64) cubren la validación de la dirección,
+El CI (job `android`) compila, ejecuta los tests y publica el APK. Los tests de JVM (72) cubren la validación de la dirección,
 la política de navegación del WebView, el bloqueo, el cliente HTTP con inicio de sesión (contra un servidor local), la lectura de las respuestas
 reales de la API y el formato; la interfaz y el WebView se comprobarán en un teléfono real
 (**por verificar**: este entorno no tiene SDK de Android).

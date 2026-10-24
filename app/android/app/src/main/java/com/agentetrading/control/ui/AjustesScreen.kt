@@ -23,10 +23,13 @@ fun AjustesScreen(env: Env) {
     val polled = env.poll("/api/riesgo/limites", 120_000, PageParsers::limites)
     Page("Ajustes", "Preferencias de la app. Los límites de riesgo se ven, pero no se editan aquí.", polled, env.refresh) { data ->
         InfoCard("Esta app") {
-            Text("Servidor: ${env.baseUrl}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                if (env.local) "Modo sin servidor: datos incluidos en la app" else "Servidor: ${env.baseUrl}",
+                style = MaterialTheme.typography.bodyMedium,
+            )
             Text("Versión ${BuildConfig.VERSION_NAME}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Button(onClick = env.onOpenSettings, modifier = Modifier.fillMaxWidth()) { Text("Servidor, bloqueo y privacidad") }
-            OutlinedButton(onClick = env.onOpenWeb, modifier = Modifier.fillMaxWidth()) { Text("Abrir el Centro de Mando web") }
+            if (!env.local) OutlinedButton(onClick = env.onOpenWeb, modifier = Modifier.fillMaxWidth()) { Text("Abrir el Centro de Mando web") }
         }
         InfoCard("Notificaciones", subtitle = "Llegan con la F6 (alertas por Telegram o por la app, sin datos sensibles).") {
             Text("Aún no hay notificaciones que configurar.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

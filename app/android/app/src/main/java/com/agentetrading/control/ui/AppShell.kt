@@ -1,6 +1,12 @@
 package com.agentetrading.control.ui
 
 import android.webkit.CookieManager
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
+import com.agentetrading.control.Format
+import com.agentetrading.control.PrefsNoteStore
+import com.agentetrading.control.net.DataSource
+import com.agentetrading.control.net.LocalSource
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,63 +84,85 @@ private val MORE = listOf(Destination.MERCADO, Destination.DECISIONES, Destinati
  * queda como salida opcional desde Ajustes.
  */
 @Composable
-fun AppShell(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit) {
-    val client = remember(baseUrl) { ApiClient(baseUrl) }
+fun AppShell(baseUrl: String?, lifecycle: Lifecycle, onOpenSettings: () -> Unit) {
+    val context = LocalContext.current
+    val local = baseUrl == null
+    // Con servidor: el cliente HTTP. Sin servidor: la instantánea que lleva la app y las notas del teléfono.
+    val source: DataSource =
+        remember(baseUrl) { if (baseUrl != null) ApiClient(baseUrl) else LocalSource({ readSnapshot(context, it) }, PrefsNoteStore(context)) }
+    val client = source as? ApiClient
     var destination by rememberSaveable { mutableStateOf(Destination.HOY) }
     var moreOpen by remember { mutableStateOf(false) }
     var needsLogin by remember(baseUrl) { mutableStateOf(false) }
+    val manifest = (source as? LocalSource)?.manifest()
     var reload by remember(baseUrl) { mutableIntStateOf(0) }
     val resumed = rememberResumed(lifecycle)
     val now = rememberNow()
 
-    val hoy = rememberPolled(client, "/api/hoy", 30_000, resumed && destination == Destination.HOY && !needsLogin, reload, { needsLogin = true }, Parsers::hoy)
-    val vivo = rememberPolled(client, "/api/en-vivo", 5_000, resumed && destination == Destination.EN_VIVO && !needsLogin, reload, { needsLogin = true }, Parsers::enVivo)
-    val env = Env(client, baseUrl, resumed && !needsLogin, reload, { needsLogin = true }, { reload++ }, onOpenSettings) { destination = Destination.WEB }
+    val hoy = rememberPolled(source, "/api/hoy", 30_000, resumed && destination == Destination.HOY && !needsLogin, reload, { needsLogin = true }, Parsers::hoy)
+    val vivo = rememberPolled(source, "/api/en-vivo", 5_000, resumed && destination == Destination.EN_VIVO && !needsLogin, reload, { needsLogin = true }, Parsers::enVivo)
+    val env =
+        Env(source, baseUrl.orEmpty(), resumed && !needsLogin, reload, { needsLogin = true }, { reload++ }, onOpenSettings, { destination = Destination.WEB }, local)
 
     BackHandler(enabled = destination != Destination.HOY && !needsLogin) { destination = Destination.HOY }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface, windowInsets = WindowInsets(0, 0, 0, 0)) {
-                BAR.forEach { item ->
-                    NavigationBarItem(
-                        selected = if (item.destination == null) destination in MORE else destination == item.destination,
-                        onClick = { if (item.destination == null) moreOpen = true else destination = item.destination },
-                        icon = { Icon(item.icon, contentDescription = null) },
-                        label = { Text(item.label) },
+    CompositionLocalProvider(LocalOpenSettings provides onOpenSettings) {
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            bottomBar = {
+                NavigationBar(containerColor = MaterialTheme.colorScheme.surface, windowInsets = WindowInsets(0, 0, 0, 0)) {
+                    BAR.forEach { item ->
+                        NavigationBarItem(
+                            selected = if (item.destination == null) destination in MORE else destination == item.destination,
+                            onClick = { if (item.destination == null) moreOpen = true else destination = item.destination },
+                            icon = { Icon(item.icon, contentDescription = null) },
+                            label = { Text(item.label) },
+                        )
+                    }
+                }
+            },
+        ) { padding ->
+            Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+                if (local) {
+                    LocalBanner(
+                        if (manifest != null) {
+                            "Modo sin servidor · datos incluidos en la app (${Format.fechaHora(manifest.first)}, commit ${manifest.second.take(7)})"
+                        } else {
+                            "Modo sin servidor · esta compilación no incluye los datos"
+                        },
+                        onOpenSettings,
                     )
                 }
-            }
-        },
-    ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            if (needsLogin) {
-                LoginScreen(
-                    client = client,
-                    onSignedIn = {
-                        // La web del WebView y la app comparten la sesión: se entra una sola vez.
-                        client.sessionCookie?.let { CookieManager.getInstance().setCookie(baseUrl, "$it; Path=/") }
-                        CookieManager.getInstance().flush()
-                        needsLogin = false
-                        reload++
-                    },
-                    onOpenSettings = onOpenSettings,
-                )
-            } else {
-                when (destination) {
-                    Destination.HOY -> HoyScreen(hoy) { reload++ }
-                    Destination.EN_VIVO -> EnVivoScreen(vivo, now) { reload++ }
-                    Destination.LABORATORIO -> LaboratorioScreen(env)
-                    Destination.RIESGO -> RiesgoScreen(env)
-                    Destination.MERCADO -> MercadoScreen(env)
-                    Destination.DECISIONES -> DecisionesScreen(env)
-                    Destination.DIARIO -> DiarioScreen(env)
-                    Destination.PROYECTO -> ProyectoScreen(env)
-                    Destination.REPORTES -> ReportesScreen(env)
-                    Destination.AJUSTES -> AjustesScreen(env)
-                    Destination.WEB -> WebScreen(baseUrl, lifecycle, "/", onOpenSettings)
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    if (needsLogin && client != null && baseUrl != null) {
+                        LoginScreen(
+                            client = client,
+                            onSignedIn = {
+                                // La web del WebView y la app comparten la sesión: se entra una sola vez.
+                                client.sessionCookie?.let { CookieManager.getInstance().setCookie(baseUrl, "$it; Path=/") }
+                                CookieManager.getInstance().flush()
+                                needsLogin = false
+                                reload++
+                            },
+                            onOpenSettings = onOpenSettings,
+                        )
+                    } else {
+                        when (destination) {
+                            Destination.HOY -> HoyScreen(hoy, local) { reload++ }
+                            Destination.EN_VIVO -> EnVivoScreen(vivo, now, local) { reload++ }
+                            Destination.LABORATORIO -> LaboratorioScreen(env)
+                            Destination.RIESGO -> RiesgoScreen(env)
+                            Destination.MERCADO -> MercadoScreen(env)
+                            Destination.DECISIONES -> DecisionesScreen(env)
+                            Destination.DIARIO -> DiarioScreen(env)
+                            Destination.PROYECTO -> ProyectoScreen(env)
+                            Destination.REPORTES -> ReportesScreen(env)
+                            Destination.AJUSTES -> AjustesScreen(env)
+                            // Solo se llega desde Ajustes con un servidor conectado.
+                            Destination.WEB -> WebScreen(baseUrl.orEmpty(), lifecycle, "/", onOpenSettings)
+                        }
+                    }
                 }
             }
         }
@@ -177,3 +205,11 @@ fun AppShell(baseUrl: String, lifecycle: Lifecycle, onOpenSettings: () -> Unit) 
         }
     }
 }
+
+/** Lee un archivo de la instantánea que la CI empaqueta en el APK (assets/snapshot). */
+private fun readSnapshot(context: android.content.Context, name: String): String? =
+    try {
+        context.assets.open("snapshot/$name").bufferedReader().use { it.readText() }
+    } catch (_: java.io.IOException) {
+        null
+    }

@@ -100,6 +100,7 @@ private fun Calculadora(env: Env) {
                         CalcState.Idle
                     }
                     is ApiClient.Result.Failed -> CalcState.Error(result.message)
+                    is ApiClient.Result.NeedsServer -> CalcState.Error(result.message)
                 }
         }
     }

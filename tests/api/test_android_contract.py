@@ -379,3 +379,54 @@ def test_the_contract_detects_a_renamed_field(client: TestClient) -> None:
     payload = client.get("/api/en-vivo").json()
     payload["motores"][0]["nombre_corto"] = payload["motores"][0].pop("nombre")
     assert _check(payload, EN_VIVO) == ["falta motores[].nombre"]
+
+
+def test_the_offline_snapshot_satisfies_the_contract_and_stays_small(tmp_path: Path) -> None:
+    """La instantánea del modo sin servidor sale de la API real: mismo contrato y ligera."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "android_snapshot", REPO_ROOT / "ops" / "android_snapshot.py"
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    names = module.build(tmp_path)
+    assert {
+        "hoy",
+        "en-vivo",
+        "limites",
+        "vetos",
+        "decisiones",
+        "diario",
+        "proyecto",
+        "reportes",
+        "laboratorio",
+    } <= set(names)
+    assert "laboratorio-h2-v1" in names
+    assert "laboratorio-h3" not in names  # H3 está aplazada: no tiene detalle
+    contracts = {
+        "hoy": HOY,
+        "en-vivo": EN_VIVO,
+        "limites": LIMITES,
+        "vetos": VETOS,
+        "decisiones": DECISIONES,
+        # Sin notas en la instantánea: se comprueba el resto del diario.
+        "diario": {k: v for k, v in DIARIO.items() if not k.startswith("notas[]")},
+        "proyecto": PROYECTO,
+        "reportes": {k: v for k, v in REPORTES.items() if not k.startswith("historial[]")},
+        "laboratorio": LABORATORIO,
+        "laboratorio-h2-v1": LABORATORIO_DETALLE,
+    }
+    for name, contract in contracts.items():
+        payload = json.loads((tmp_path / f"{name}.json").read_text("utf-8"))
+        assert _check(payload, contract) == [], name
+    manifest = json.loads((tmp_path / "manifest.json").read_text("utf-8"))
+    assert manifest["commit"]
+    assert manifest["generado_utc"].endswith("Z")
+    total = sum(p.stat().st_size for p in tmp_path.iterdir())
+    assert total < 1_000_000, f"la instantánea pesa {total} bytes"
+    # Nada del holdout ni de cuentas: solo páginas de lectura.
+    assert not (tmp_path / "mercado-velas.json").exists()

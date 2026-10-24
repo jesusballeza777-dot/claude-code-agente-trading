@@ -15,6 +15,7 @@ El esqueleto de la app Android (ADR-010) tenía cinco pantallas básicas con dat
 1. **La app Android es un cliente nativo del Centro de Mando, que pasa a nativo página por página.**
    - **Etapa 1 (hecha):** muestra el mismo sitio en un `WebView` endurecido, así que tiene todas las páginas y se actualiza con la web sin publicar otro APK.
    - **Etapa 2 (hecha):** **todas** las páginas del Centro de Mando son pantallas nativas (Compose): Hoy, En vivo, Laboratorio, Riesgo (con la calculadora del motor real), Mercado (velas, funding, regímenes y correlaciones dibujados en la app), Decisiones, Diario, Proyecto, Reportes y Ajustes. Leen la API con un cliente HTTP propio, sin puente JavaScript. Un test de contrato en Python (`tests/api/test_android_contract.py`) falla si un cambio de la API rompe lo que la app lee. El `WebView` queda solo como salida opcional ("Abrir el Centro de Mando web", en Ajustes).
+   - **Etapa 2b (hecha): modo sin servidor.** La app abre sin pedir ninguna dirección (botón "Usar sin servidor"). Lleva dentro una instantánea que genera la CI con la misma API sobre el commit del APK (`ops/android_snapshot.py`, unos 300 KB): resultados reales de la F4, estado del proyecto, límites, decisiones de ejemplo y diario; las notas se guardan en el teléfono. Lo que necesita un servidor lo dice claramente en vez de inventar cifras: la calculadora (motor de riesgo en Python), los datos de mercado (≈200 MB) y los reportes. La fuente de datos es intercambiable (`DataSource`: servidor o instantánea), así que más adelante puede haber una tercera fuente (motor dentro del teléfono, F6) sin tocar las pantallas.
    - **Etapa 3 (pendiente):** notificaciones (F6) y, si se decide en la F6, una fuente de datos local en el teléfono (ver el ADR de ejecución).
 2. **Lo nativo se limita a lo que el navegador no da bien:**
    - Pantalla de conexión que comprueba que la dirección es de verdad un Centro de Mando antes de guardarla.
@@ -31,6 +32,10 @@ El esqueleto de la app Android (ADR-010) tenía cinco pantallas básicas con dat
    - Sin claves de exchanges ni de wallets en el teléfono y sin permisos más allá de INTERNET. La app hereda la regla de solo lectura de la API: no puede enviar órdenes, activar `LIVE_TRADING`, crear claves ni cambiar límites.
 5. **Honestidad de los datos:** En vivo muestra qué piezas existen y cuáles no (exchanges "no conectado", analista y sombra "no iniciado"). Las decisiones del analista salen rotuladas como demostración hasta la F5.
 6. **También se puede instalar la web como app** desde el navegador (manifest e iconos), como alternativa sin APK.
+
+## Por qué no todo el sistema dentro del teléfono (decisión del 24-oct-2026)
+
+El propietario preguntó si la app podía ser el sistema completo, sin servidor. Lo que **sí** puede vivir en el teléfono sin riesgo (consulta de resultados, documentos, notas) ya vive (etapa 2b). Lo que opera con dinero (analista, ejecución, claves de exchange, auditoría) se decide en la F6 con su propio ADR: stops en el exchange (que protegen aunque el teléfono muera), claves con permisos mínimos y sin retiro, estado reconstruible desde el exchange y respaldo cifrado de la auditoría. Hasta entonces no hay nada que operar.
 
 ## Alternativas consideradas
 

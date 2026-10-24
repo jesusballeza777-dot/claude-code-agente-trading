@@ -62,8 +62,11 @@ class MainActivity : FragmentActivity() {
         backgroundedAt = SystemClock.elapsedRealtime()
     }
 
+    /** Con un servidor guardado o en modo sin servidor ya se puede entrar a la app. */
+    private fun hasConnection(): Boolean = prefs.useLocal || prefs.serverUrl != null
+
     private fun decideScreen() {
-        if (prefs.serverUrl == null) {
+        if (!hasConnection()) {
             screen = Screen.SETTINGS
             return
         }
@@ -117,10 +120,18 @@ class MainActivity : FragmentActivity() {
                         lockEnabled = lockEnabled && AppLock.available(this@MainActivity),
                         secureScreen = secureScreen,
                         lockAvailable = AppLock.available(this@MainActivity),
-                        canClose = prefs.serverUrl != null,
+                        canClose = hasConnection(),
+                        localActive = prefs.useLocal,
+                        onUseLocal = {
+                            prefs.useLocal = true
+                            unlockedAt = SystemClock.elapsedRealtime()
+                            backgroundedAt = null
+                            screen = Screen.WEB
+                        },
                         onSaved = { url ->
                             if (url != prefs.serverUrl) CookieManager.getInstance().removeAllCookies(null)
                             prefs.serverUrl = url
+                            prefs.useLocal = false
                             unlockedAt = SystemClock.elapsedRealtime()
                             backgroundedAt = null
                             screen = Screen.WEB
@@ -137,9 +148,12 @@ class MainActivity : FragmentActivity() {
                         onClose = { screen = Screen.WEB },
                     )
                 Screen.WEB ->
-                    prefs.serverUrl?.let { url ->
-                        AppShell(baseUrl = url, lifecycle = lifecycle, onOpenSettings = { screen = Screen.SETTINGS })
-                    }
+                    // Sin servidor (null) la app usa los datos que lleva dentro.
+                    AppShell(
+                        baseUrl = if (prefs.useLocal) null else prefs.serverUrl,
+                        lifecycle = lifecycle,
+                        onOpenSettings = { screen = Screen.SETTINGS },
+                    )
             }
         }
     }

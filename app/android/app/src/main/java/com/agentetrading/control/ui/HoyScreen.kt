@@ -34,7 +34,7 @@ import com.agentetrading.control.model.Origen
 
 /** Hoy: ¿estoy a salvo?, ¿qué ha decidido el sistema?, ¿está aprendiendo de verdad? En segundos. */
 @Composable
-fun HoyScreen(polled: Polled<Hoy>, onRefresh: () -> Unit) {
+fun HoyScreen(polled: Polled<Hoy>, local: Boolean, onRefresh: () -> Unit) {
     val hoy = polled.data
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 12.dp),
@@ -56,7 +56,7 @@ fun HoyScreen(polled: Polled<Hoy>, onRefresh: () -> Unit) {
             hoy == null -> LoadingBox()
             else -> {
                 if (polled.error != null) OfflineBanner(polled.error)
-                Semaforo(hoy)
+                Semaforo(hoy, local)
                 ParteDelDia(hoy)
                 CapitalYDrawdown(hoy)
                 Presupuesto(hoy)
@@ -83,7 +83,7 @@ fun HoyScreen(polled: Polled<Hoy>, onRefresh: () -> Unit) {
 }
 
 @Composable
-private fun Semaforo(hoy: Hoy) {
+private fun Semaforo(hoy: Hoy, local: Boolean) {
     val estado = hoy.estado
     InfoCard("Semáforo del sistema", origin = estado.origen) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -95,8 +95,10 @@ private fun Semaforo(hoy: Hoy) {
             StatusRow("Fase", estado.faseActual, Tone.NEUTRAL)
             StatusRow(
                 "Datos",
-                if (estado.datosDisponible) "2020-2024 al ${Format.pctOf(estado.completitud)} · última vela ${estado.ultimaVela ?: "—"}" else "Sin descargar",
-                if (estado.datosDisponible) Tone.GOOD else Tone.WARN,
+                if (local && !estado.datosDisponible) {
+                    "Los datos de mercado 2020-2024 (unos 200 MB) viven en tu servidor"
+                } else if (estado.datosDisponible) "2020-2024 al ${Format.pctOf(estado.completitud)} · última vela ${estado.ultimaVela ?: "—"}" else "Sin descargar",
+                if (estado.datosDisponible) Tone.GOOD else if (local) Tone.NEUTRAL else Tone.WARN,
             )
             StatusRow(
                 "Motor de riesgo",
